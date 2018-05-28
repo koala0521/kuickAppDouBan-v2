@@ -12,11 +12,8 @@
   import account from '@service.account';
   import app from '@system.app';
 
-
 // 引入统计代码
   import APP_STATISTICS from '../gulp/dist/appStatistics.min';
-
-  import './statistics/a';
 
   export default {
 
@@ -24,14 +21,12 @@
 
       APP_STATISTICS.app_sta_init( this );
      
-      console.log( '官方统计数据 >>>>' , JSON.stringify( account.getProvider() )  );
-      
-      console.log( 'app.getInfo >>>>' , JSON.stringify( app.getInfo() )  );
-        
-      // console.log( '入口 >> this.$data 信息 >>>>' , typeof this.$data === "object" ? JSON.stringify( this.$data ) : this.$data );
+      console.log( 'this.$app.$def >>>>' , JSON.stringify( this.$def )  );
+      console.log( 'this.$app.$data >>>>' , JSON.stringify( this.$data )  );
+
     },
     onDestroy () {
-        console.info('*****Application onDestroy*****')        
+      console.info('*****Application onDestroy*****')        
     },
      
     showMenu: util.showMenu,

@@ -5,13 +5,12 @@ import device from "@system.device";
 import geolocation from "@system.geolocation";
 import network from "@system.network";
 import account from '@service.account';
-// 引入路由 组件 监听页面切换
-import router from '@system.router';
+
 
 // 不需要声明的全局模块
 import app from "@system.app";
-
-import router from "@system.router";
+// 引入路由 组件 监听页面切换
+import router from '@system.router';
 
 // 工具函数
 const _toString = Object.prototype.toString;
@@ -284,6 +283,12 @@ const APP_STATISTICS = {
 
 		// 获取授权信息
 		APP_STATISTICS.getWarrantData();
+
+		// 初始化页面跳转监听
+		APP_STATISTICS.watchRouter((path)=>{
+			console.log(`当前路劲是${ path }`);
+			
+		});
 	},
 	// 获取授权信息
 	getWarrantData() {
@@ -458,8 +463,7 @@ const APP_STATISTICS = {
 	watchRouter(cb){
 
 		let lastLen = router.getLength();
-		let lastPath = router.getState().path;
-		
+		let lastPath = router.getState().path;		
 		setInterval(()=>{
 		
 			let routerLen = router.getLength();
@@ -469,9 +473,12 @@ const APP_STATISTICS = {
 				console.log( `路由变化了，路劲是：${ path }` );
 				lastLen = routerLen;
 				lastPath = path;
-				cb();
+				cb && cb( path );
 			} 
 		},300);
+		
+		console.log( `开始监听了` );
+		
 	},
 
 	/**
