@@ -6,7 +6,10 @@
     <div class="header" style="background-color: {{theme.color}}">
         <image onclick="showMenu" class="head-menu" src="../assets/menu.png"></image>
         <text class="head-title">{{menuList[currentIndex].type}}</text>
-        <image onclick="toSearch" class="head-search" src="../assets/search.png"></image>
+        <a href="/About">
+            <image onclick="toSearch" class="head-search" src="../assets/search.png"></image>
+            查找    
+        </a>
     </div>
     <div class="content-warp" show="{{list[currentIndex].type==='movie'}}">
         <movie if="{{list[0].render}}" class="item-content" onto-detail="toMovie"></movie>

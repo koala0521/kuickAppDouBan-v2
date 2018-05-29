@@ -37,8 +37,7 @@
                 <div class="item-warp">
                 <text class="item-order">6、</text>
                 <div>
-                    <text class="mess">欢迎star。 </text>
-                    <a style="text-decoration: underline;color: {{theme.color}}" href="https://github.com/keenjaan/quick-app-douban">传送门</a>
+                    <input type="button" value="强制刷新" onclick="reforce" >
                 </div>
             </div>
         </div>
@@ -85,7 +84,12 @@ export default {
   onInit () {
       this.theme = this.$app.$def.theme;
       // this.$page.setTitleBar({backgroundColor: this.theme.color, textColor: '#ffffff'});
+  },
+  reforce(){
+      
+      this.$forceUpdate();
   }
+
 }
 </script>
 
