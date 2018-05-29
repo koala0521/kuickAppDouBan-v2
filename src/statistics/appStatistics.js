@@ -4,13 +4,15 @@ import nativeFetch from "@system.fetch";
 import device from "@system.device";
 import geolocation from "@system.geolocation";
 import network from "@system.network";
-import account from '@service.account';
-
+import account from "@service.account";
 
 // 不需要声明的全局模块
 import app from "@system.app";
 // 引入路由 组件 监听页面切换
 import router from '@system.router';
+
+// 配置文件
+import APP_CONFIG from './statistics.config';
 
 // 工具函数
 const _toString = Object.prototype.toString;
@@ -470,13 +472,13 @@ const APP_STATISTICS = {
 			let path = router.getState().path;
 		
 			if( (lastLen !== routerLen) || (lastPath !== path) ){
-				console.log( `路由变化了，路劲是：${ path }` );
+				console.log( `路由变化了，路劲是：${ path },长度是${ routerLen }` );
 				lastLen = routerLen;
 				lastPath = path;
 				cb && cb( path );
 			} 
 		},300);
-		
+
 		console.log( `开始监听了` );
 		
 	},
