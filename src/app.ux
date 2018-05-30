@@ -21,8 +21,8 @@
 
       APP_STATISTICS.app_sta_init( this );
      
-      console.log( 'this.$app.$def >>>>' , JSON.stringify( this.$def )  );
-      console.log( 'this.$app.$data >>>>' , JSON.stringify( this.$data )  );
+      // console.log( 'this.$app.$def >>>>' , JSON.stringify( this.$def )  );
+      // console.log( 'this.$app.$data >>>>' , JSON.stringify( this.$data )  );
 
     },
     onDestroy () {

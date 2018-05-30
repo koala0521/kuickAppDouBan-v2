@@ -12,7 +12,7 @@ import app from "@system.app";
 import router from '@system.router';
 
 // 配置文件
-import APP_CONFIG from './statistics.config';
+import APP_CONFIG from '../../src/statistics/statistics.config';
 
 // 工具函数
 const _toString = Object.prototype.toString;
@@ -287,8 +287,17 @@ const APP_STATISTICS = {
 		APP_STATISTICS.getWarrantData();
 
 		// 初始化页面跳转监听
-		APP_STATISTICS.watchRouter((path)=>{
-			console.log(`当前路劲是${ path }`);
+		APP_STATISTICS.watchRouter(( route )=>{
+
+			console.log( `路由变化了，路劲是：${ route.path },页面名称是：${ route.name }`);
+			let args = {
+				'request_id':APP_STATISTICS.baseData.requestId,
+				'page_name':route.name,
+				'page_path':route.path,
+				'package':APP_STATISTICS.baseData.package
+			};
+			
+			APP_STATISTICS.submitAction( args , '2' );
 			
 		});
 	},
@@ -345,7 +354,7 @@ const APP_STATISTICS = {
 			success: function (data) {
 				APP_STATISTICS.deviceInfo.netType = data.type;
 			},
-			complete: function () {
+			complete: function () {				
 				APP_STATISTICS.networkWarrant = true;
 				console.log(`网络获取完成>>>>>>`);
 			}
@@ -472,15 +481,11 @@ const APP_STATISTICS = {
 			let path = router.getState().path;
 		
 			if( (lastLen !== routerLen) || (lastPath !== path) ){
-				console.log( `路由变化了，路劲是：${ path },长度是${ routerLen }` );
 				lastLen = routerLen;
 				lastPath = path;
-				cb && cb( path );
+				cb && cb( router.getState() );
 			} 
 		},300);
-
-		console.log( `开始监听了` );
-		
 	},
 
 	/**
@@ -548,7 +553,7 @@ const APP_STATISTICS = {
 			}
 		}
 
-		APP_STATISTICS.submitAction(change_args, "");
+		APP_STATISTICS.submitAction(change_args, '1');
 	},
 
 	/**
@@ -560,10 +565,11 @@ const APP_STATISTICS = {
 		let type = actionType || "";
 
 		args.action = type;
+		args.app_id = APP_CONFIG.app_id;
 		// JSON转为查询字符串
 		let argsToQueryStr = toQueryString(args);
 
-		// console.log(`参数查看：>>>> ${JSON.stringify(args)} `);
+		console.log(`参数查看：>>>> ${JSON.stringify(args)} `);
 
 		// 提交日志
 		NETWORK.get({

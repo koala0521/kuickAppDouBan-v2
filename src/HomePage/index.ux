@@ -22,23 +22,22 @@
                     </div>
                 </div>
                 <!-- <div class="item-warp">
-                    <text class="item-order">2、</text>
-                    <div>
-                        <text class="mess">重点说一下，本人十分热爱户外运动，登山、徒步、露营、等户外运动欢迎带上我，当然摄影老司机也可以带上我（不要嫌我拍照技术差）</text>
-                    </div>
-                </div>
-                <div class="item-warp">
-                    <text class="item-order">3、</text>
-                    <div>
-                        <text class="mess">联系方式：keenjaan@163.com</text>
-                    </div>
-                </div>
-                <div class="item-warp">
-                    <text class="item-order">4、</text>
-                    <div>
-                        <text class="mess">关于技术问题和户外运动欢迎来骚扰！</text>
-                    </div>
+                    <text onclick="playerMusic" > 播放 </text> |
+                    <text onclick="paused" > 暂停 </text>
                 </div> -->
+                <!-- <div class="item-warp">
+                    <video id="video" autoplay="true" src="../assets/music/我要你.mp3"></video>
+                </div> -->
+
+                <div class="item-warp">
+                    <image src="../assets/1.jpg" ></image>
+                </div>
+                <div class="item-warp">
+                    <image src="../assets/2.jpg" ></image>
+                </div>
+                <div class="item-warp">
+                    <image src="../assets/3.jpg" ></image>
+                </div>
             </div>
         </div>
    </div>
@@ -78,6 +77,10 @@
     .content-warp {
         padding: 0 30px;
         
+    }
+    #video{
+        /* visibility:hidden; */
+        opacity:0;
     }
 </style>
 
@@ -126,7 +129,15 @@ export default {
         url: 'http://sandbox.sspapi.gm825.net/url/proxy?app_id=434&adslot_id=2570'
     })
     
+  },
+  playerMusic(){
+
+    // this.$element("video").start();
+  },
+  paused(){
+    // this.$element("video").pause();
   }
+
 }
 </script>
 
