@@ -356,7 +356,6 @@ const APP_STATISTICS = {
 			},
 			complete: function () {				
 				APP_STATISTICS.networkWarrant = true;
-				console.log(`网络获取完成>>>>>>`);
 			}
 		});
 
