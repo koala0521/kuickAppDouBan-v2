@@ -229,6 +229,11 @@ const APP_STATISTICS = {
 		longitude: 0,
 		latitude: 0
 	},
+	// router信息
+	routeInfo:{
+		'page_name':'',
+		'page_path':''
+	}
 
 	// 获取 id 授权
 	deviceIdWarrant: false,
@@ -269,7 +274,10 @@ const APP_STATISTICS = {
 		// 读取 cuid
 		APP_STATISTICS.getCuid();
 
-		for (let key in APP_STATISTICS.baseData) {
+		// 包名
+		APP_STATISTICS.baseData.package = APP_CONFIG.app_key;
+
+		for ( let key in APP_STATISTICS.baseData ) {
 			if (APP_STATISTICS.baseData.hasOwnProperty(key)) {
 				// 应用信息保存
 				if (manifest[key]) {
@@ -288,6 +296,9 @@ const APP_STATISTICS = {
 
 		// 初始化页面跳转监听
 		APP_STATISTICS.watchRouter(( route )=>{
+
+			APP_STATISTICS.routeInfo.page_name = route.name;
+			APP_STATISTICS.routeInfo.page_path = route.path;
 
 			console.log( `路由变化了，路劲是：${ route.path },页面名称是：${ route.name }`);
 			let args = {
@@ -498,7 +509,6 @@ const APP_STATISTICS = {
 			return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
 		}
 
-		// id =  APP_STATISTICS.baseData.package + "-" + randomStr() + "-" + randomStr()+ "-" + randomStr();
 		id = d.getTime() + "-" + randomStr() + "-" + randomStr() + "-" + randomStr();
 
 		return id;

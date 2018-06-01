@@ -15,7 +15,7 @@
 // 引入统计代码
   import APP_STATISTICS from '../gulp/dist/appStatistics.min';
 
-  export default {
+  export default {  
 
     onCreate:function() {
 
