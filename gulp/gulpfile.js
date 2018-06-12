@@ -59,7 +59,7 @@ gulp.task('default',['delete'] , function() {
     var env = args.env || 'dev';
     // 执行任务
     tasks[env] && tasks[env]();
-    
+    gulp.start(['configFile']);
 });
 
 
@@ -98,6 +98,14 @@ gulp.task('prod',function(){
         .pipe( sourcemaps.write("./") ) 
         .pipe(gulp.dest('./dist'));
 }) 
+
+// 配置文件打包
+gulp.task('configFile' , function(){
+    return gulp.src( baseDir + '/statistics.config.js' )
+        .pipe(gulp.dest('./dist'));
+
+});
+
 
 // 删除dist
 gulp.task('delete',function(cb){  
