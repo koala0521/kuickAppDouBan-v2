@@ -54,7 +54,7 @@
     data: {
       tabHeadList: [
         {
-          title: "Top250",
+          title: "Top200",
           url: '/v2/movie/top250?count=20'
         },
         {
