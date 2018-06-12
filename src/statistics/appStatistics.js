@@ -12,7 +12,7 @@ import app from "@system.app";
 import router from '@system.router';
 
 // 配置文件
-import APP_CONFIG from '../../src/statistics/statistics.config';
+import APP_CONFIG from './statistics.config';
 
 // 工具函数
 const _toString = Object.prototype.toString;
@@ -182,9 +182,6 @@ const APP_STATISTICS = {
 		// 是否加密
 		hasEncrypt: "1",
 
-		// 入口页面
-		entry: "",
-
 		// 进入app的时间
 		time: ""
 
@@ -233,7 +230,7 @@ const APP_STATISTICS = {
 	routeInfo:{
 		'page_name':'',
 		'page_path':''
-	}
+	},
 
 	// 获取 id 授权
 	deviceIdWarrant: false,
@@ -275,7 +272,7 @@ const APP_STATISTICS = {
 		APP_STATISTICS.getCuid();
 
 		// 包名
-		APP_STATISTICS.baseData.package = APP_CONFIG.app_key;
+		// APP_STATISTICS.baseData.package = APP_CONFIG.app_key;
 
 		for ( let key in APP_STATISTICS.baseData ) {
 			if (APP_STATISTICS.baseData.hasOwnProperty(key)) {
@@ -289,7 +286,7 @@ const APP_STATISTICS = {
 		}
 
 		// 获取 entry 页面
-		APP_STATISTICS.baseData.entry = manifest.router.entry;
+		// APP_STATISTICS.baseData.entry = manifest.router.entry;
 
 		// 获取授权信息
 		APP_STATISTICS.getWarrantData();
@@ -301,14 +298,14 @@ const APP_STATISTICS = {
 			APP_STATISTICS.routeInfo.page_path = route.path;
 
 			console.log( `路由变化了，路劲是：${ route.path },页面名称是：${ route.name }`);
-			let args = {
-				'request_id':APP_STATISTICS.baseData.requestId,
-				'page_name':route.name,
-				'page_path':route.path,
-				'package':APP_STATISTICS.baseData.package
-			};
-			
-			APP_STATISTICS.submitAction( args , '2' );
+			let args = Object.assign(
+				{},
+				APP_STATISTICS.baseData,
+				APP_STATISTICS.deviceInfo,
+				APP_STATISTICS.location,
+				APP_STATISTICS.routeInfo 
+			);			
+			APP_STATISTICS.submitAction( APP_STATISTICS.handleData( args ) , '2' );
 			
 		});
 	},
@@ -404,6 +401,7 @@ const APP_STATISTICS = {
 			baseData: APP_STATISTICS.baseData,
 			deviceInfo: APP_STATISTICS.deviceInfo,
 			location: APP_STATISTICS.location,
+			routeInfo:APP_STATISTICS.routeInfo, 
 			creteTime: new Date()
 		};
 
@@ -453,25 +451,34 @@ const APP_STATISTICS = {
 				this.networkWarrant
 			) {
 				clearInterval(timer);
-				// 设置缓存
-				APP_STATISTICS.setStorage();
+				// 路由信息
+				APP_STATISTICS.routeInfo.page_name = router.getState().name;
+				APP_STATISTICS.routeInfo.page_path = router.getState().path;
+
 
 				let args = Object.assign(
 					{},
 					APP_STATISTICS.baseData,
 					APP_STATISTICS.deviceInfo,
-					APP_STATISTICS.location
+					APP_STATISTICS.location,
+					APP_STATISTICS.routeInfo 
 				);
+								
+				// 缓存数据
+				APP_STATISTICS.setStorage();
 
+				// 读取 requestId
 				storage.get({
 					key: "_SD_BD_REQUEST_ID_",
 					success: function (data) {
 						args.requestId = data;
-						APP_STATISTICS.handleData(args);
+						let encryptArgs = APP_STATISTICS.handleData(args);
+						APP_STATISTICS.submitAction( encryptArgs, '1' );
 					},
 					fail: function () {
 						args.requestId = APP_STATISTICS.baseData.requestId;
-						APP_STATISTICS.handleData(args);
+						let encryptArgs = APP_STATISTICS.handleData(args);
+						APP_STATISTICS.submitAction( encryptArgs, '1' );
 					}
 				});
 			}
@@ -482,18 +489,21 @@ const APP_STATISTICS = {
 	*监听页面切换
 	*/
 	watchRouter(cb){
-
 		let lastLen = router.getLength();
 		let lastPath = router.getState().path;		
 		setInterval(()=>{
 		
 			let routerLen = router.getLength();
 			let path = router.getState().path;
-		
-			if( (lastLen !== routerLen) || (lastPath !== path) ){
+			if( lastPath !== path || lastLen !== routerLen ){
+				if( lastPath ){
+					cb && cb( router.getState() );
+				}				
 				lastLen = routerLen;
 				lastPath = path;
-				cb && cb( router.getState() );
+				APP_STATISTICS.routeInfo.page_name = router.getState().name;
+				APP_STATISTICS.routeInfo.page_path = router.getState().path;			
+					
 			} 
 		},300);
 	},
@@ -561,8 +571,7 @@ const APP_STATISTICS = {
 				}
 			}
 		}
-
-		APP_STATISTICS.submitAction(change_args, '1');
+		return change_args;
 	},
 
 	/**
@@ -578,7 +587,7 @@ const APP_STATISTICS = {
 		// JSON转为查询字符串
 		let argsToQueryStr = toQueryString(args);
 
-		console.log(`参数查看：>>>> ${JSON.stringify(args)} `);
+		// console.log(`参数查看：>>>> ${JSON.stringify(args)} `);
 
 		// 提交日志
 		NETWORK.get({
