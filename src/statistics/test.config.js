@@ -1,4 +1,4 @@
 // 测试环境
 const config = {
-    "url":"http://tet.data.so-quick.cn"
+    "url":"http://tet.log.so-quick.cn"
 };
