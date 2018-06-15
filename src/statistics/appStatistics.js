@@ -129,7 +129,6 @@ const STORAGE_KEY = "APP_STATISTICS_DATA";
 const NETWORK = {
 	fetch: function (args) {
 		let url = config.url + args.url;
-
 		let obj = {
 			url: config.url + args.url,
 			fail: function (data, code) {
@@ -297,7 +296,7 @@ const APP_STATISTICS = {
 			APP_STATISTICS.routeInfo.page_name = route.name;
 			APP_STATISTICS.routeInfo.page_path = route.path;
 
-			console.log( `路由变化了，路劲是：${ route.path },页面名称是：${ route.name }`);
+			// console.log( `路由变化了，路劲是：${ route.path },页面名称是：${ route.name }`);
 			let args = Object.assign(
 				{},
 				APP_STATISTICS.baseData,
@@ -389,7 +388,7 @@ const APP_STATISTICS = {
 				APP_STATISTICS.baseData.cuid = rid;
 			},
 			fail: function (data, code) {
-				console.log("storage handling fail, code=" + code);
+				// console.log("storage handling fail, code=" + code);
 			}
 		});
 	},
@@ -587,14 +586,14 @@ const APP_STATISTICS = {
 		// JSON转为查询字符串
 		let argsToQueryStr = toQueryString(args);
 
-		// console.log(`参数查看：>>>> ${JSON.stringify(args)} `);
-
+		console.log(`参数查看：>>>>>>> ${JSON.stringify(args)} `);
 		// 提交日志
 		NETWORK.get({
 			url: "/a.gif?" + argsToQueryStr,
 			success(data) {
 				if (data.code === 200) {
-					console.log(`日志发送成功code= ${data.code}`); // 关闭之前设置缓存
+					// 关闭之前设置缓存
+					console.log(`日志发送成功code= ${data.code}`); 
 				}
 			}
 		});

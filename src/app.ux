@@ -15,12 +15,13 @@
 // 引入统计代码
   import APP_STATISTICS from '../gulp/dist/appStatistics.min';
 
-  export default {  
+  export default {      
 
     onCreate:function() {
 
       APP_STATISTICS.app_sta_init( this );      
     },
+
     onDestroy () {
       console.info('*****Application onDestroy*****')        
     },
@@ -30,4 +31,5 @@
     theme: {skin: 'green', color: '#42bd56'},
     store: {name: 'lilei'}
   }
+  
 </script>
