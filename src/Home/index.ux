@@ -8,7 +8,7 @@
         <text class="head-title">{{menuList[currentIndex].type}}</text>
         <a href="/About">
             <image onclick="toSearch" class="head-search" src="../assets/search.png"></image>
-            查找    
+            未引入统计SDK    
         </a>
     </div>
     <div class="content-warp" show="{{list[currentIndex].type==='movie'}}">

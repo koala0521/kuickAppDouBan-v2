@@ -9,7 +9,7 @@
                 <div class="item-warp">
                     <text class="item-order">1、</text>
                     <div>
-                        <text class="mess"> 快应用测试demo </text>
+                        <text class="mess"> 快应用demo（未引入统计SDK） </text>
                     </div>
 
                 </div>
