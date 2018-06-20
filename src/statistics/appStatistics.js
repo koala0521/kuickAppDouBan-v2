@@ -132,7 +132,7 @@ const NETWORK = {
 		let obj = {
 			url: config.url + args.url,
 			fail: function (data, code) {
-				console.log(`请求失败, code = ${code}`);
+				console.log(`请求失败, code = ${code}` , url );
 			}
 		};
 
@@ -504,7 +504,7 @@ const APP_STATISTICS = {
 				APP_STATISTICS.routeInfo.page_path = router.getState().path;			
 					
 			} 
-		},300);
+		},200);
 	},
 
 	/**
@@ -586,7 +586,7 @@ const APP_STATISTICS = {
 		// JSON转为查询字符串
 		let argsToQueryStr = toQueryString(args);
 
-		console.log(`参数查看：>>>>>>> ${JSON.stringify(args)} `);
+		// console.log(`参数查看：>>>>>>> ${JSON.stringify(args)} `);
 		// 提交日志
 		NETWORK.get({
 			url: "/a.gif?" + argsToQueryStr,
