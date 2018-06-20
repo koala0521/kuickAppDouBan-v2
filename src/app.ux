@@ -13,16 +13,21 @@
   import app from '@system.app';
      
 // 引入统计代码
-  import APP_STATISTICS from '../gulp/dist/appStatistics.min';
-
+  // import APP_STATISTICS from '../gulp/dist/appStatistics.min';
+ 
   export default {      
 
     onCreate:function() {
+      
+      console.log('=============开启=======================');
+      console.log( `未引入统计SDK` );
+      console.log('==============开启======================');
 
       APP_STATISTICS.app_sta_init( this );      
     },
 
     onDestroy () {
+
       console.info('*****Application onDestroy*****')        
     },
      
