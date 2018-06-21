@@ -1,12 +1,9 @@
-该项目为快应用练手项目，基于豆瓣api v2。
+该项目为快应用练手项目，基于豆瓣api v2 （ 最新版 ） 。
 > 说明：按照官方文档所说推荐使用node v6.11.3这个版本，而我本地使用的是8以上的版本。所以就使用了nvm来管理node的版本，切换非常方便，关于nvm请自行google。
 
 
 
 ~~~
-## 克隆项目
-git clone git@github.com:keenjaan/quick-app-douban.git
-
 ## 安装依赖
 npm install
 
