@@ -13,7 +13,7 @@
   import app from '@system.app';
      
 // 引入统计代码
-  // import APP_STATISTICS from '../gulp/dist/appStatistics.min';
+  import APP_STATISTICS from '../gulp/dist/appStatistics.min';
  
   export default {      
 

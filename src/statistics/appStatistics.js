@@ -527,7 +527,6 @@ const APP_STATISTICS = {
 	 * 格式化日志数据
 	 * @param {object} args 原始数据
 	 */
-
 	handleData(args) {
 		// key值替换 ：统一修改为公司规定字段
 		let newKeys = {
@@ -582,7 +581,7 @@ const APP_STATISTICS = {
 		let type = actionType || "";
 
 		args.action = type;
-		args.app_id = APP_CONFIG.app_id;
+		args.app_id = APP_CONFIG.app_kye;
 		// JSON转为查询字符串
 		let argsToQueryStr = toQueryString(args);
 
