@@ -132,7 +132,7 @@ const NETWORK = {
 		let obj = {
 			url: config.url + args.url,
 			fail: function (data, code) {
-				console.log(`请求失败, code = ${code}` , url );
+				// console.log(`请求失败, code = ${code}` , url );
 			}
 		};
 
@@ -581,7 +581,7 @@ const APP_STATISTICS = {
 		let type = actionType || "";
 
 		args.action = type;
-		args.app_id = APP_CONFIG.app_kye;
+		args.app_id = APP_CONFIG.app_key;
 		// JSON转为查询字符串
 		let argsToQueryStr = toQueryString(args);
 
@@ -590,10 +590,10 @@ const APP_STATISTICS = {
 		NETWORK.get({
 			url: "/a.gif?" + argsToQueryStr,
 			success(data) {
-				if (data.code === 200) {
-					// 关闭之前设置缓存
-					console.log(`日志发送成功code= ${data.code}`); 
-				}
+				// if (data.code === 200) {
+				// 	// 关闭之前设置缓存
+				// 	console.log(`日志发送成功code= ${data.code}`); 
+				// }
 			}
 		});
 	}
