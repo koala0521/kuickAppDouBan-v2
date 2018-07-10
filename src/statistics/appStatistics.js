@@ -150,8 +150,9 @@ const NETWORK = {
 	}
 };
 
-// 统计代码
+// 统计
 const APP_STATISTICS = {
+	// 基础信息
 	baseData: {
 		package: "",     // 应用包名：应用的唯一标识
 
@@ -227,31 +228,33 @@ const APP_STATISTICS = {
 	},
 	// router信息
 	routeInfo:{
-		'page_name':'',
-		'page_path':''
+		page_name: '',
+		page_path: ''
 	},
 
-	// 获取 id 授权
+	// 获取唯一 id 授权状态
 	deviceIdWarrant: false,
-	// 设备信息授权
+	// 设备信息授权状态
 	deviceInfoWarrant: false,
-	// 地理位置授权
+	// 地理位置授权状态
 	getLocationWarrant: false,
-	// 网络类型授权
+	// 网络类型授权状态
 	networkWarrant: false,
 
 	// 打开app
 	createApp(deviceData) {
 
 		const APP = deviceData || { options: {}, _def: {} };
-
+		
+		APP.options = APP.options || {};
+		
 		let d = new Date();
 		// 解构出  env 和 manifest 对象
 		let {
 			options: { env },
 			_def: { manifest }
 		} = APP;
-
+		console.log( `options=` ,JSON.stringify( APP.options ));
 		// 获取 packageName 值
 		let { source } = app.getInfo();
 
@@ -270,9 +273,6 @@ const APP_STATISTICS = {
 		// 读取 cuid
 		APP_STATISTICS.getCuid();
 
-		// 包名
-		// APP_STATISTICS.baseData.package = APP_CONFIG.app_key;
-
 		for ( let key in APP_STATISTICS.baseData ) {
 			if (APP_STATISTICS.baseData.hasOwnProperty(key)) {
 				// 应用信息保存
@@ -283,10 +283,7 @@ const APP_STATISTICS = {
 				}
 			}
 		}
-
-		// 获取 entry 页面
-		// APP_STATISTICS.baseData.entry = manifest.router.entry;
-
+		
 		// 获取授权信息
 		APP_STATISTICS.getWarrantData();
 
@@ -508,9 +505,10 @@ const APP_STATISTICS = {
 	},
 
 	/**
-	 * js 生成 cuid
+	 *
+	 * @description 生成 cuid. 生成机制 : 时间戳  + '-' + 四位随机字符串 + '-' + 四位随机字符串 + '-' + 四位随机字符串
+	 * @returns string 
 	 */
-
 	createCuid() {
 		let id = "";
 		let d = new Date();
@@ -586,6 +584,7 @@ const APP_STATISTICS = {
 		let argsToQueryStr = toQueryString(args);
 
 		// console.log(`参数查看：>>>>>>> ${JSON.stringify(args)} `);
+		console.log(`cuid:${ decrypt(args.cuid, args.request_id) }`); 
 		// 提交日志
 		NETWORK.get({
 			url: "/a.gif?" + argsToQueryStr,
@@ -596,7 +595,24 @@ const APP_STATISTICS = {
 				// }
 			}
 		});
-	}
+	},
+
+	/**
+	 * 发送关闭 app 日志
+	 *
+	 */
+	destroyLog(){
+
+		let args = Object.assign(
+			{},
+			APP_STATISTICS.baseData,
+			APP_STATISTICS.deviceInfo,
+			APP_STATISTICS.location,
+			APP_STATISTICS.routeInfo 
+		);			
+		APP_STATISTICS.submitAction( APP_STATISTICS.handleData( args ) , '0' );
+		
+	}	
 };
 
 // 全局变量
@@ -604,9 +620,11 @@ const hookTo = global.__proto__ || global;
 
 // 只暴露接口
 hookTo.APP_STATISTICS = {
-	app_sta_init: APP_STATISTICS.createApp
+	app_sta_init: APP_STATISTICS.createApp,
+	submitAction: APP_STATISTICS.submitAction
 };
 
 export default {
-	app_sta_init: APP_STATISTICS.createApp
+	app_sta_init: APP_STATISTICS.createApp,
+	app_destroy: APP_STATISTICS.destroyLog
 };
