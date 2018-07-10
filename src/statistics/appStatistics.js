@@ -246,7 +246,9 @@ const APP_STATISTICS = {
 
 		const APP = deviceData || { options: {}, _def: {} };
 		
-		APP.options = APP.options || {};
+		// 兼容华为
+		APP.options = APP.options || { env: {} };
+		APP._def = APP._def || { manifest: {} };
 		
 		let d = new Date();
 		// 解构出  env 和 manifest 对象
@@ -254,7 +256,7 @@ const APP_STATISTICS = {
 			options: { env },
 			_def: { manifest }
 		} = APP;
-		console.log( `options=` ,JSON.stringify( APP.options ));
+		// console.log( `options=` ,JSON.stringify( APP.options ));
 		// 获取 packageName 值
 		let { source } = app.getInfo();
 

@@ -1,6 +1,6 @@
 {
-  "package": "com.tongjiceshi.demo",
-  "name": "quick-app",
+  "package": "com.tongjisdk.demo",
+  "name": "quickApp",
   "versionName": "1.0.0",
   "versionCode": "1",
   "minPlatformVersion": "1000",
