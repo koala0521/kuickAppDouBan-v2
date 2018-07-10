@@ -14,7 +14,7 @@ const network = {
    * @return {Promise}
    */
   async fetch (obj) {
-    // console.log('开始网络请求');
+    console.log('开始网络请求');
     const url = SERVER_URL + obj.url;
     let options = Object.assign(obj, {url})
     const p1 = new Promise((resolve, reject) => {
@@ -55,6 +55,6 @@ const network = {
 // 注入到全局
 const hookTo = global.__proto__ || global
 hookTo.network = network
-// export {
-//   network
-// }
+export default {
+  network
+}

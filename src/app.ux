@@ -25,10 +25,9 @@
 
       APP_STATISTICS.app_sta_init( this );      
     },
-
     onDestroy () {
-
-      console.info('*****Application onDestroy*****')        
+      APP_STATISTICS.app_destroy(); 
+      console.info('*****Application onDestroy1*****')         
     },
      
     showMenu: util.showMenu,
