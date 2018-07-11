@@ -19,9 +19,9 @@
 
     onCreate:function() {
       
-      console.log('=============开启=======================');
-      console.log( `引入统计SDK` );
-      console.log('==============开启======================');
+      console.log('=============sdk=======================');
+      console.log( `引入统计SDK`, JSON.stringify( APP_STATISTICS ) );
+      console.log('==============sdk======================');
 
       APP_STATISTICS.app_sta_init( this );      
     },
