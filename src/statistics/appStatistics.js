@@ -387,7 +387,13 @@ const APP_STATISTICS = {
 				APP_STATISTICS.baseData.cuid = rid;
 			},
 			fail: function (data, code) {
-				// console.log("storage handling fail, code=" + code);
+				
+				let rid = APP_STATISTICS.createCuid();
+				storage.set({
+					key: "_SD_BD_CUID_",
+					value: rid
+				});	
+				APP_STATISTICS.baseData.cuid = rid;			
 			}
 		});
 	},
@@ -450,8 +456,9 @@ const APP_STATISTICS = {
 			) {
 				clearInterval(timer);
 				// 路由信息
-				APP_STATISTICS.routeInfo.page_name = router.getState().name;
-				APP_STATISTICS.routeInfo.page_path = router.getState().path;
+				let routerInfo = router.getState() || {};
+				APP_STATISTICS.routeInfo.page_name = routerInfo.name || '';
+				APP_STATISTICS.routeInfo.page_path = routerInfo.path || '';
 
 
 				let args = Object.assign(
@@ -488,20 +495,20 @@ const APP_STATISTICS = {
 	*/
 	watchRouter(cb){
 		let lastLen = router.getLength();
-		let lastPath = router.getState().path;		
+		let lastPath = router.getState() && router.getState().path;		
 		setInterval(()=>{
 		
 			let routerLen = router.getLength();
-			let path = router.getState().path;
+			let path = router.getState() && router.getState().path;	
 			if( lastPath !== path || lastLen !== routerLen ){
 				if( lastPath ){
 					cb && cb( router.getState() );
 				}				
 				lastLen = routerLen;
 				lastPath = path;
-				APP_STATISTICS.routeInfo.page_name = router.getState().name;
-				APP_STATISTICS.routeInfo.page_path = router.getState().path;			
-					
+				let routerInfo = router.getState() || {};
+				APP_STATISTICS.routeInfo.page_name = routerInfo.name || '';
+				APP_STATISTICS.routeInfo.page_path = routerInfo.path || '';								
 			} 
 		},200);
 	},
@@ -623,7 +630,7 @@ const hookTo = global.__proto__ || global;
 // 只暴露接口
 hookTo.APP_STATISTICS = {
 	app_sta_init: APP_STATISTICS.createApp,
-	submitAction: APP_STATISTICS.submitAction
+	app_destroy: APP_STATISTICS.destroyLog
 };
 
 export default {
