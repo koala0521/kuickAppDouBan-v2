@@ -276,7 +276,7 @@ import APP_CONFIG from './statistics.config';
 					manifest
 				}
 			} = APP;
-			console.log( `options=` ,JSON.stringify( APP.options ));
+			// console.log( `options=` ,JSON.stringify( APP.options ));
 			// 获取 packageName 值
 			let {
 				source
@@ -285,10 +285,10 @@ import APP_CONFIG from './statistics.config';
 			// 渠道数据 account.getProvider()
 			APP_STATISTICS.baseData.packageName = account.getProvider();
 
-			// 进入时间
+			// 记录进入时间
 			APP_STATISTICS.baseData.time = d.getTime() + "";
 
-			// 缓存  reqestId
+			// 缓存 reqestId
 			storage.set({
 				key: "_SD_BD_REQUEST_ID_",
 				value: APP_STATISTICS.baseData.requestId
@@ -353,7 +353,6 @@ import APP_CONFIG from './statistics.config';
 							APP_STATISTICS.deviceInfo[key] = data[key];
 						}
 					}
-
 					// 品牌、型号、生产厂家 统一转换小写
 					APP_STATISTICS.deviceInfo.brand = APP_STATISTICS.deviceInfo.brand.toLowerCase();
 					APP_STATISTICS.deviceInfo.model = APP_STATISTICS.deviceInfo.model.toLowerCase();
@@ -510,9 +509,10 @@ import APP_CONFIG from './statistics.config';
 			}, 10);
 		},
 
-		/*
-			*监听页面切换
-			*/
+		/**
+		 * @description 监听页面切换
+		 * @param 页面切换后执行的回调
+		 */
 		watchRouter(cb) {
 			let lastLen = router.getLength();
 			let lastPath = router.getState() && router.getState().path;
@@ -613,7 +613,7 @@ import APP_CONFIG from './statistics.config';
 			// JSON转为查询字符串
 			let argsToQueryStr = toQueryString(args);
 
-			console.log(`参数查看：>> ${JSON.stringify(args)} `);
+			// console.log(`参数查看：>> ${JSON.stringify(args)} `);
 			// console.log(`cuid:${ decrypt(args.cuid, args.request_id) }`); 
 			// 提交日志
 			NETWORK.get({
