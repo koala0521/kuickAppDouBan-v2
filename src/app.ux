@@ -17,6 +17,8 @@
 
 // 引入统计代码
   // import APP_STATISTICS from '../gulp/dist/appStatistics.min';
+
+  // shortcut.hasInstalled(OBJECT) 桌面图标接口
  
   export default {      
 
