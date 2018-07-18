@@ -258,7 +258,7 @@ const APP_STATISTICS = {
 		} = APP;
 		// console.log( `options=` ,JSON.stringify( APP.options ));
 		// 获取 packageName 值
-		let { source } = app.getInfo();
+		// let { source } = app.getInfo();
 
 		// 渠道数据 account.getProvider()
 		APP_STATISTICS.baseData.packageName = account.getProvider();
@@ -522,6 +522,7 @@ const APP_STATISTICS = {
 		let id = "";
 		let d = new Date();
 		function randomStr() {
+			// 长度为 4 的随机字符串
 			return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
 		}
 

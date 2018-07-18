@@ -12,21 +12,35 @@
   import account from '@service.account';
   import app from '@system.app';
      
+
+  // import device from "@system.device";
+
 // 引入统计代码
-  import APP_STATISTICS from '../gulp/dist/appStatistics.min';
+  // import APP_STATISTICS from '../gulp/dist/appStatistics.min';
  
   export default {      
 
     onCreate:function() {
-      
-      console.log('=============sdk=======================');
-      console.log( `引入统计SDK`, JSON.stringify( APP_STATISTICS ) );
-      console.log('==============sdk======================');
 
-      APP_STATISTICS.app_sta_init( this );      
+      // console.log( 'getInfo' , JSON.stringify( app.getInfo() ) );
+      // console.log( 'this' , JSON.stringify( this ) );
+      
+      // device.getId({
+      //   'type': ['device', 'user' ,'mac' ],
+      //   success: function ( data ) {
+      //   // do something
+      //   console.log('success' , JSON.stringify( data ) );
+        
+      //   },
+      //   fail:function( data , code ){
+      //     console.log('fail' , JSON.stringify( data ) );
+      //   }
+      // });   
+
+      APP_STATISTICS.app_sta_init( this ); 
     },
     onDestroy () {
-      APP_STATISTICS.app_destroy(); 
+      // APP_STATISTICS.app_destroy(); 
       console.info('*****Application onDestroy1*****')         
     },
      

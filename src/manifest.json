@@ -1,8 +1,8 @@
 {
-  "package": "com.gapfangdouban.demo",
-  "name": "高仿豆瓣11",
+  "package": "com.fangdouban.demo",
+  "name": "高仿豆瓣22",
   "versionName": "1.0.0",
-  "versionCode": "3",
+  "versionCode": "1",
   "minPlatformVersion": "1000",
   "icon": "/Common/logo.png",
   "features": [
