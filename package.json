@@ -51,7 +51,7 @@
     "jsrsasign": "^7.1.2",
     "jsrsasign-util": "^1.0.0",
     "loader-utils": "~0.2.14",
-    "md5": "^2.1.0",
+    "md5": "^2.2.1",
     "parse5": "^3.0.0",
     "prompt": "^1.0.0",
     "qr-image": "^3.2.0",
