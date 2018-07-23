@@ -278,9 +278,9 @@ import APP_CONFIG from './statistics.config';
 			} = APP;
 			// console.log( `options=` ,JSON.stringify( APP.options ));
 			// 获取 packageName 值
-			let {
-				source
-			} = app.getInfo();
+			// let {
+			// 	source
+			// } = app.getInfo();
 
 			// 渠道数据 account.getProvider()
 			APP_STATISTICS.baseData.packageName = account.getProvider();
