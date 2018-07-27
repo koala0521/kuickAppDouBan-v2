@@ -8,7 +8,7 @@
         <text class="head-title">{{menuList[currentIndex].type}}</text>
         <a href="/About">
             <image onclick="toSearch" class="head-search" src="../assets/search.png"></image>
-            引入SDK    
+            引入友盟SDK    
         </a>
     </div>
     <div class="content-warp" show="{{list[currentIndex].type==='movie'}}">
@@ -416,7 +416,15 @@ export default {
     prompt.showToast({
         message:'暂无该功能'
     })
-  }
+  },
+    onShow(){
+        $umeng_stat.resume(this) //在onShow方法的第一行加入此代码
+        //App业务代码
+    },
+    onHide() {
+        $umeng_stat.pause(this);//在onHide方法的第一行加入此代码
+        //App业务代码
+    }      
 }
 </script>
 

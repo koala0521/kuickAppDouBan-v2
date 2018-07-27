@@ -167,7 +167,7 @@ export default {
     theme: {color: ''}
   },
   onReady () {
-    console.info('id', this.id);
+    // console.info('id', this.id);
     this.theme = this.$app.$def.theme;
     this.$page.setTitleBar({backgroundColor: this.theme.color, textColor: '#ffffff'});
     this.getData(); 
