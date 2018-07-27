@@ -107,7 +107,6 @@ import APP_CONFIG from './statistics.config';
 	 * @param : message 密文
 	 * @return : decrypted string 明文
 	*/
-
 	function decrypt(message, req) {
 		let keyLen = 16;
 		// initKey 长度必须是16或者16的倍数
@@ -155,15 +154,7 @@ import APP_CONFIG from './statistics.config';
 	function createRequestId( cuid ) {
 		let r_id = cuid || randomStr() + randomStr();
 		return md5( r_id );
-	} 
-
-	
-	//  storage key : 所有缓存数据
-	const STORAGE_KEY = "APP_STATISTICS_DATA";
-	// cuid key
-	const CUID_KEY = "_SD_BD_CUID_";
-	// requestId key
-	const REQ_KEY = "_SD_BD_REQUEST_ID_";
+	}
 
 	//  请求封装
 	const FETCH = {
@@ -182,6 +173,57 @@ import APP_CONFIG from './statistics.config';
 			return this.fetch(args);
 		}
 	};
+
+		//  storage key : 所有缓存数据
+	const STORAGE_DATA_KEY = "APP_STATISTICS_DATA",
+		// cuid key
+		CUID_KEY = "_SD_BD_CUID_",
+		// requestId key
+		REQ_KEY = "_SD_BD_REQUEST_ID_";
+
+	// 设置缓存 
+	function setStorage( ...args ){
+		return new Promise((resolve, reject) => {
+			storage.set({
+				key: args[0],
+				value: args[1] || '',
+				success: function (data) {
+					resolve( data );
+				},
+				fail: function (data, code) {
+					reject();
+				}
+			})
+		})
+	}
+	// 设置缓存 
+	function getStorage( key ){
+		return new Promise((resolve, reject) => {
+			storage.get({
+				key: key,
+				success: function (data) {
+					resolve( data );
+				},
+				fail: function (data, code) {
+					reject();
+				}
+			})
+		})
+	}
+	// 删除缓存 
+	function getStorage( key ){
+		return new Promise((resolve, reject) => {
+			storage.delete({
+				key: key,
+				success: function (data) {
+					resolve( data );
+				  },
+				fail: function (data, code) {
+					reject();
+				}
+			})
+		})
+	}	
 	// 获取信息接口
 	const DATAS_API = {
 		deviceIds(){
@@ -222,37 +264,92 @@ import APP_CONFIG from './statistics.config';
 			})					
 		}
 	};
+	// 初始化数据
+	const sta_data = {
+		public:{},
+	};
 
-	function Wanka_statistics (){
-		this.init();
+	class Wanka_app_sta {
+
+		constructor( name ){
+			this.state = {
+				cuid: ''
+			};
+			this.init = this.init.bind( this );
+			this.setStorage = this.setStorage.bind( this );
+			this.init();
+		}
+		init (){
+			console.log( 'name' , this.state.cuid );
+		}
+		getCuid (){
+			getStorage( CUID_KEY )
+			.then(data => {
+				// this.state = data.
+			})
+			.catch(() => {
+				createCuid();
+			})
+		}
+		setStorage (){
+
+		}
+		submitAction (){
+
+		}
 	}
 
-	Wanka_statistics.prototype.init = function(){
-
-	}
-
-	Wanka_statistics.prototype.getStorage = function(){
-
-	}
-	Wanka_statistics.prototype.setStorage = function( data ){
-		storage.set({
-			key: STORAGE_KEY,
-			value: JSON.stringify(data),
-			success: function () {}
-		});
-	}
-	Wanka_statistics.prototype.publicData = function(){
-
-	}
-	Wanka_statistics.prototype.submitAction = function(){
-		
+	// 接口暴露
+	const API = {
+		open_app( app_info ){
+			try {
+				new Wanka_app_sta('测试');
+				console.log('============ 打开app ========================');
+				console.log( 'app_info >>>>>>>' , JSON.stringify( app_info ) );
+				console.log('============ 打开app ========================');
+			} catch (error) {
+				console.log('============ 打开app error ========================');
+				console.log(error.massage);
+				console.log('============ 打开app error ========================');
+			}
+		},
+		closed_app(){
+			try {
+				new Wanka_app_sta('测试');
+			} catch (error) {
+				console.log('============ 关闭app error ========================');
+				console.log( 'error info' , error.massage);
+				console.log('============ 关闭app error ========================');
+			}
+		},
+		page_show(page_info){
+			try {
+				new Wanka_app_sta('测试');
+			} catch (error) {
+				console.log('============ show_page error ========================');
+				console.log( 'error info' , error.massage);
+				console.log('============ show_page error ========================');
+			}
+		},
+		page_hide(page_info){
+			try {
+				new Wanka_app_sta('测试');
+			} catch (error) {
+				console.log('============ page_hide error ========================');
+				console.log( 'error info' , error.massage);
+				console.log('============ page_hide error ========================');
+			}
+		},
+		custom_track( id , args ){
+			
+		}
 	}
 
 	// 统计
 	const APP_STATISTICS = {
 		// 基础信息
 		baseData: {
-			package: "", // 应用包名：应用的唯一标识
+			package: "", // 应用包名：应用的唯一标识 
 
 			// 来源平台
 			packageName: "", //发送日志时，key 需要修改  =>  channel
@@ -275,7 +372,7 @@ import APP_CONFIG from './statistics.config';
 			cuid: "",
 
 			// 请求id
-			requestId: "req" + new Date().getTime(),
+			requestId: "",
 
 			// 是否加密
 			hasEncrypt: "1",
@@ -371,7 +468,6 @@ import APP_CONFIG from './statistics.config';
 
 			// 渠道数据 account.getProvider()
 			APP_STATISTICS.baseData.packageName = account.getProvider();
-
 
 			// 缓存 reqestId
 			storage.set({
@@ -729,12 +825,15 @@ import APP_CONFIG from './statistics.config';
 		}
 	};
 
-
-
 	return {
-		'app_sta_init': APP_STATISTICS.createApp,
-		'app_destroy': APP_STATISTICS.destroyLog
+		'app_sta_init': API.open_app,
+		'app_destroy': API.closed_app
 	}
+
+	// return {
+	// 	'app_sta_init': APP_STATISTICS.createApp,
+	// 	'app_destroy': APP_STATISTICS.destroyLog
+	// }
 });
 
 // // 全局变量
