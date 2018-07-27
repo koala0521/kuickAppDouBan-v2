@@ -14,7 +14,6 @@ const network = {
    * @return {Promise}
    */
   async fetch (obj) {
-    console.log('开始网络请求');
     const url = SERVER_URL + obj.url;
     let options = Object.assign(obj, {url})
     const p1 = new Promise((resolve, reject) => {
