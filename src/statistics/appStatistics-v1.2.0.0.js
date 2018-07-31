@@ -89,16 +89,9 @@ import APP_CONFIG from './statistics.config';
 	 * @param {data} : 需要加密的字符串
 	 * @return : string 密文
 	*/
-	function encrypt( data, req) {
+	function encrypt( data, initKey ) {
 		let keyLen = 16;
 		// initKey 长度必须是16或者16的倍数
-		let initKey = req;
-		let len = (req.length % keyLen) == 0 ? 0 : (keyLen - (req.length % keyLen));
-
-		for (let i = 0; i < len; i++) {
-			initKey += "$";
-		}
-
 		let key = CryptoJS.enc.Latin1.parse(initKey);
 		let iv = CryptoJS.enc.Latin1.parse(initKey);
 
@@ -115,15 +108,9 @@ import APP_CONFIG from './statistics.config';
 	 * @param : message 密文
 	 * @return : decrypted string 明文
 	*/
-	function decrypt(message, req) {
+	function decrypt(message, initKey ) {
 		let keyLen = 16;
 		// initKey 长度必须是16或者16的倍数
-		let initKey = req;
-		let len = (req.length % keyLen) == 0 ? 0 : (keyLen - (req.length % keyLen));
-
-		for (let i = 0; i < len; i++) {
-			initKey += "$";
-		}
 
 		let key = CryptoJS.enc.Latin1.parse(initKey);
 		let iv = CryptoJS.enc.Latin1.parse(initKey);
@@ -159,7 +146,7 @@ import APP_CONFIG from './statistics.config';
 	 * @return cuid ( md5加密 )
 	 * */
 	function createRequestId( cuid ) {
-		let r_id = ( cuid || randomStr() )+ randomStr() + randomStr() + Date.now();
+		let r_id = Date.now() + randomStr() + randomStr() + ( cuid || randomStr() );
 		return md5( r_id );
 	}
 
@@ -181,7 +168,7 @@ import APP_CONFIG from './statistics.config';
 			let timeout_fn = new Promise(( resolve ,reject ) =>{
 				setTimeout(() => {
 					resolve({ code:204, massage:'请求超时'});
-				}, 3000);
+				}, 3000 );
 			});
 			return Promise.race([ timeout_fn , ajax]);
 		}
@@ -191,13 +178,13 @@ import APP_CONFIG from './statistics.config';
 	 * @param {string} args  数据
 	 * @param {string} actionType  请求类型
 	 */
-	function submitAction ( args ) {
+	function submitAction ( queryStr ) {
 		console.log('==============submitAction======================');
-		console.log( toString(args) );
+		console.log( queryStr );
 		console.log('===============submitAction=====================');
 		// let type = actionType || "";
 		// JSON转为查询字符串
-		let queryStr = toQueryString(args); 
+		// let queryStr = toQueryString(args); 
 		// 提交日志
 		return FETCH.get( { url:"/a.gif?" + queryStr } )
 	}
@@ -295,16 +282,9 @@ import APP_CONFIG from './statistics.config';
 	};
 
 	//  storage key : 用户信息数据
-	const STORAGE_DATA_KEY = "APP_STATISTICS_DATA",
-	// cuid key
-	CUID_KEY = "_SD_BD_CUID_",
-	// requestId key
-	// REQ_KEY = "_SD_BD_REQUEST_ID_",
-	PAGE_START_KEY = "_SD_BD_PAGE_START_",
-
-	APP_STATISTICS_LOGS = "_APP_STA_UNSEND_LOGS_";	
-
-	// 
+	const CUID_KEY = "_SD_BD_CUID_",
+		// REQ_KEY = "_SD_BD_REQUEST_ID_",
+		PAGE_START_KEY = "_SD_BD_PAGE_START_";
 
 	// 初始化数据
 	const BASE_DATA = {
@@ -313,7 +293,7 @@ import APP_CONFIG from './statistics.config';
 	};
 	// 日志状态
 	const LOG_STATE = {
-		has_init_storage: !1,
+		has_init: !1,
 		has_cuid_storage: !1,
 		has_request_id_storage: !1,
 	};
@@ -327,13 +307,16 @@ import APP_CONFIG from './statistics.config';
 				is_entry: 1,
 				cuid:'',
 				req: '',
+				log_list:[]
 			};
 			this.init = this.init.bind( this );
 			this.page_stat = this.page_stat.bind( this );
 			this.page_end = this.page_end.bind( this );
 			this.merge_datas = this.merge_datas.bind( this );
+			this.save_to_queue = this.save_to_queue.bind( this );
 		}
 		init ( app_data ){
+			LOG_STATE.has_init = !0;
 			let datas = {};
 			// 兼容华为
 			let APP = app_data || {
@@ -379,34 +362,24 @@ import APP_CONFIG from './statistics.config';
 	
 							// 保存数据
 							let user_data = this.state.data = { ...format_datas.device( user_all_data , this.state.cuid ) , ...format_datas.public( public_data ) };					
-							// 设置数据缓存
-							setStorage( STORAGE_DATA_KEY , toString( user_data ) )
-								.then( res => {
-									if( res ){ 
-										LOG_STATE.has_init_storage = !0;
-									}
-								});
+							
 							setStorage( CUID_KEY , public_data.cuid )
 								.then( res => {
 									if( res ){
 										LOG_STATE.has_cuid_storage = !0;
 									}
-								});
-							// setStorage( REQ_KEY , public_data.req )
-							// 	.then( res => {
-							// 		LOG_STATE.has_request_id_storage = !0;
-							// 	});							
+								});							
 						})							
 				})
 		}
 		page_stat( pageData ){
-			console.log( 'this.state.data >>>> page start');
+
 			let {name , path} = router.getState();			
 			this.state.page = {
 				sta_time: Date.now(),
 				page_path: name || '', 
 				page_path: path || '',
-				is_entry: this.state.is_entry,
+				is_entry: this.state.is_entry || 0,
 			};			
 			this.state.is_entry = 0; 
 			setStorage( PAGE_START_KEY , this.state.page )
@@ -415,7 +388,7 @@ import APP_CONFIG from './statistics.config';
 				});
 		}
 		page_end( pageData ){
-			console.log( 'this.state.data >>>> page hide');
+
 			if( !this.state.cuid && !this.state.data ) return
 
 			let end_time = Date.now();
@@ -437,55 +410,61 @@ import APP_CONFIG from './statistics.config';
 				});
 			}
 		}
-		// 合并基础数据和上次页面数据
+		// 合并数据 => 发送当次日志
 		merge_datas(){
 			let log_data = {};
 			if( this.state.data && this.state.page ){
 				log_data = {
 					...this.state.data,
-					...this.state.page
+					...this.state.page,
+					...BASE_DATA,
 				};
-				console.log('req >>>>>>' , log_data.request_id );
+				// console.log('req >>>>>>' , log_data.request_id );
+				// console.log('cuid >>>>>>' , log_data.cuid );
 
 				// 发送日志
-				submitAction( log_data )
+				submitAction( toQueryString(log_data) )
 				.then(res => {
 					if( res.code == 200 ){	
 						console.log('提交日志成功' , toString(res) );
+						this.send_queue();
 					}else{									
-						console.log('提交日志失败');
+						
+						// 发送失败时，保存日志队列
+						this.save_to_queue( toQueryString(log_data) );
 					}				
 				})
 				.catch(err => {
-					console.log('提交日志失败');
-				});				
-				
-				//  提交日志失败时， 缓存日志 ？？？ 未确定
-				getStorage(APP_STATISTICS_LOGS)
-					.then( res =>{
-						let log_list = null;
-						if( res ){
-							log_list = JSON.parse( res );
-						}else{
-							log_list = [];
-						}
-						log_list.push( log_data );
-						// setStorage(APP_STATISTICS_LOGS , toString( log_list ) );
-						
-						// submitAction( log_data )
-						// 	.then(res => {
-						// 		if( res.code == 200 ){	
-						// 			console.log('提交日志成功' , toString(res) );
-						// 		}else{									
-						// 			console.log('提交日志失败');
-						// 		}				
-						// 	})
-						// 	.catch(err => {
-						// 		console.log('提交日志失败');
-						// 	});
-					});				
+					
+					// 发送失败时，保存日志队列
+					this.save_to_queue( toQueryString(log_data) );
+				});							
 			}
 		}
+		save_to_queue( log ){
+			let len = this.state.log_list && this.state.log_list.length;
+			if( len && len < 50 ){
+				this.state.log_list.push( toQueryString(log_data) );
+			}
+			return this.state.log_list	
+		}
+		// 发送日志队列的所有日志 ， 不成功则保存到日志队列
+		send_queue(){
+			let queue = [ ...this.state.log_list ];
+			this.state.log_list = [];
+			queue.forEach(item => {
+				submitAction( item )
+					.then(res => {
+						if( res.code != 200 ){	
+							save_to_queue( item );
+						}
+					})
+					.catch(err =>{
+						save_to_queue( item );
+					})
+			});
+		}
+
 	}
 
 	// format_data 格式化数据
@@ -503,33 +482,34 @@ import APP_CONFIG from './statistics.config';
 				// 设备唯一id
 				client_id: encrypt(args.device || '' , cuid ),
 				// mac
-				info_ma: encrypt(args.mac || '' , cuid),
+				info_ma: encrypt( args.mac || '' , cuid ),
 				// 用户唯一id
-				os_id: encrypt(args.user || '' , cuid ), 
+				os_id: ( args.user || '' ), 
 				// 品牌
-				make: (args.brand || '').toLowerCase(), // => make
+				make: (args.brand || '').toLowerCase(), 
 				// 生产厂商
 				manufacturer: (args.manufacturer || '').toLowerCase(),
 				// 型号
 				model: (args.model || '').toLowerCase(),
 				// 产品名称
-				product: args.product || '',
+				product: (args.product || '').toLowerCase(),
 				// 操作系统
 				os_type: args.osType || '',
 				// 系统版本
 				ovr: args.osVersionName || '', 
 				// 平台版本
-				platform_version_name: args.platformVersionName || '',
+				pla_ver: args.platformVersionName || '',
 				// 语言
-				language: args.language || '',
+				lan: (args.language || '').toLowerCase(),
 				// 地区
-				region: args.region || '',
-				screen_width: args.screenWidth || '',
-				screen_height: args.screenHeight || '',
+				region: (args.region || '').toLowerCase(),
+				// 尺寸
+				px: `${(args.screenWidth || '')}*${(args.screenHeight || '')}`,
 				// 网络类型
-				net_type: args.type || '',	
+				net: args.type || '',	
+				// 是否创建图标
+				has_iocn: ''
 			};
-
 		},
 		page( args ){
 			return {
@@ -538,7 +518,7 @@ import APP_CONFIG from './statistics.config';
 				sta_time: '',
 				end_time: '',
 				duration: '',
-				is_entry: !1,				
+				is_entry: 0,				
 			}
 		},
 		public( args ){
@@ -546,7 +526,7 @@ import APP_CONFIG from './statistics.config';
 				app_id : APP_CONFIG.app_key || '',
 				cuid: args.cuid,			
 				// 请求id
-				request_id: args.req,
+				req_id: args.req,
 				en_code : 'cuid'
 			}
 		}
@@ -572,37 +552,36 @@ import APP_CONFIG from './statistics.config';
 	// 接口暴露
 	const API = {
 		open_app( app_info ){
-			try {
+			try {				
+				// 删除缓存
+				delStorage( PAGE_START_KEY );
+				if( !APP_CONFIG.app_key ){
+					console.error('没有填写 app_key ！');
+					return
+				}
 				$statistic.init( app_info );
-				delStorage(APP_STATISTICS_LOGS);
 			} catch (error) {
 
 			}
 		},
-		// closed_app(){
-		// 	try {
-		// 		new Wanka_statistic('测试');
-		// 	} catch (error) {
-
-		// 	}
-		// },
 		page_show(page_info){
 			try {
-				// let statistic = new Wanka_statistic;
 				console.log('============ 打开页面 ========================');
-				
-				$statistic.page_stat( page_info );
+				if( LOG_STATE.has_init ){
+					$statistic.page_stat( page_info );
+				}
 			} catch (error) {
 				console.log('============ error ========================' );
 			}
 		},
 		page_hide(page_info){
 			try {
-				// let statistic = new Wanka_statistic;
 				console.log('============ 关闭页面 ========================');
-				$statistic.page_end( page_info );
+				if( LOG_STATE.has_init ){
+					$statistic.page_end( page_info );
+				}
 			} catch (error) {
-
+				console.log('============ error ========================' );
 			}
 		},
 		custom_track( id , args ){
@@ -622,17 +601,7 @@ import APP_CONFIG from './statistics.config';
 		'app_sta_init': API.open_app,
 		'page_show': API.page_show,
 		'page_hide': API.page_hide
-		// 'app_destroy': API.closed_app
 	}
-
 });
 
-// // 全局变量
-// const hookTo = global.__proto__ || global;
-
-// // 只暴露接口
-// hookTo.APP_STATISTICS = {
-// 	app_sta_init: APP_STATISTICS.createApp,
-// 	app_destroy: APP_STATISTICS.destroyLog
-// };
 
