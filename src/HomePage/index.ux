@@ -84,9 +84,8 @@ import webview from '@system.webview'
 
 // console.log( ' 关于页面 (app.getInfo())>>>>' , JSON.stringify( app.getInfo() ) );
 
-
-export default {
-  onInit () {
+export default Custom_page({
+    onInit () {
     const theme = this.$app.$def.theme;
     // this.$page.setTitleBar({backgroundColor: theme.color, textColor: '#ffffff'});
     //console.log( '页面 >> this.$page 信息 >>>>' , typeof this.$page === "object" ? JSON.stringify( this.$page ) : this.$page );
@@ -101,19 +100,6 @@ export default {
     let data = this.$app.$data;
 
     data.currentPage = "aoubt/aaa";
-
-    // APP_STATISTICS.log( this.$page );
-
-    // console.log( '页面 >> this 信息 >>>>' ,  typeof this === "object" ? JSON.stringify( this ) : this  );
-
-    // console.log( '页面 >> this.$page 信息 >>>>' , typeof this.$page === "object" ? JSON.stringify( this.$page ) : this.$page );
-
-    // // console.log( '页面 >> this.$app 信息 >>>>' , typeof this.$app === "object" ? JSON.stringify( this.$app ) : this.$app );
-
-    // console.log( '页面 >> this.$app.$def 信息 >>>>' , typeof this.$app.$def === "object" ? JSON.stringify( this.$app.$def ) : this.$app.$def );
-
-    // console.log( '页面 >> this.$app.$data 信息 >>>>' , typeof this.$app.$data === "object" ? JSON.stringify( this.$app.$data ) : this.$app.$data );
-    
 
   },
   toPage(evt){
@@ -131,6 +117,7 @@ export default {
     // this.$element("video").pause();
   }
 
-}
+});
+
 </script>
 

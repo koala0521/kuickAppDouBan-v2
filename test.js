@@ -1,22 +1,23 @@
+
 // 测试 promise
-function a(n){
+function a(m){
     return new Promise((resolve , reject)=>{
-        if( n < 2 ){
+        if( m < 2 ){
             setTimeout(()=>{
-                resolve('a success')
-            },5000)
+                resolve({data:{a:1}})
+            },100)
         }else{
             reject('a error')
         }
     })
     .then(res => {
-        console.log('n是小于2的');
-        return n
+        console.log('m是小于2的'  , res );
+        return m
         
     })
     .catch(err => {
-        console.log('n是大于2的');
-        return n
+        console.log('m是大于2的' , err );
+        return m
     });
 
 }
@@ -24,24 +25,33 @@ function a(n){
 function b(n){
 
     return new Promise((resolve , reject)=>{
-        if( n < 4 ){
+        if( n > 4 ){
             resolve('b success')
         }else{
             reject('b error')
         }
     })    
     .then(res => {
-        console.log('n是小于4的');
+        console.log('n是大于4的' , n );
         return n
     })
     .catch(err => {
-        console.log('n是大于4的');
-        return n
+        console.log('n是小于4的' , n);
+        return b(++n)
     });
 
 }
 
-Promise.all( [ a(1) , b(4)] ).then( res =>{
+console.log('1');  
+a(1)
+.then(res =>{
+    console.log('then');    
+})
+
+console.log(2);  
+
+
+Promise.all( [ a(1) , b(1)] ).then( res =>{
     console.log('res' ,  res);
 
 })

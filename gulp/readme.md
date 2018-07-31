@@ -16,6 +16,9 @@
 
     gulp --env=prod
 
+    <!-- 实时调试 -->
+    gulp watch
+
 ```
 
 

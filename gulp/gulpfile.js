@@ -16,7 +16,7 @@ var baseDir = "../src/statistics";
 
 
 // 基础文件
-var baseFiles = [baseDir + '/aes.js'  , baseDir + '/appStatistics-v3.js' ];
+var baseFiles = [baseDir + '/aes.js'  , baseDir + '/appStatistics-v1.2.0.0.js' ];
 
 // var allFils;
 
@@ -147,8 +147,7 @@ gulp.task( "uglify" , function () {
 
 gulp.task("watch",()=>{
 
-    gulp.start('default');
-    
+    gulp.start('default');    
     //监控文件变化，自动打包 
     gulp.watch("../src/statistics/*.js", ['default']);
 

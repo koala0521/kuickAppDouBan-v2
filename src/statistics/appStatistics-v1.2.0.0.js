@@ -8,7 +8,7 @@ import account from "@service.account";
 import md5 from 'md5';
 
 // 不需要声明的全局模块
-// import app from "@system.app";
+import app from "@system.app";
 // 引入路由 组件 监听页面切换
 import router from '@system.router';
 
@@ -46,6 +46,10 @@ import APP_CONFIG from './statistics.config';
 		str = str.substring(0, str.length - 1);
 		return str;
 	}
+	// 转字符串
+	function toString( obj ){
+		return JSON.stringify( obj );
+	}
 
 	// 计算字符串的字节长度
 	function getByteLen(val) {
@@ -80,8 +84,12 @@ import APP_CONFIG from './statistics.config';
 		});
 	}
 
-	//  CryptoJS 加密
-	function encrypt(data, req) {
+	/** 
+	 * @description : AES加密
+	 * @param {data} : 需要加密的字符串
+	 * @return : string 密文
+	*/
+	function encrypt( data, req) {
 		let keyLen = 16;
 		// initKey 长度必须是16或者16的倍数
 		let initKey = req;
@@ -142,9 +150,8 @@ import APP_CONFIG from './statistics.config';
 	 * @return cuid ( md5加密 )
 	 * */
 	function createCuid( imei ) {
-		let d = new Date();
 		let IMEI = imei || randomStr();
-		return md5(d.getTime() + "-" + randomStr() + "-" + randomStr() + "-" + randomStr() + "-" + IMEI);
+		return md5(Date.now() + "-" + randomStr() + "-" + randomStr() + "-" + randomStr() + "-" + IMEI);
 	} 
 
 	/** 
@@ -152,34 +159,49 @@ import APP_CONFIG from './statistics.config';
 	 * @return cuid ( md5加密 )
 	 * */
 	function createRequestId( cuid ) {
-		let r_id = cuid || randomStr() + randomStr();
+		let r_id = ( cuid || randomStr() )+ randomStr() + randomStr() + Date.now();
 		return md5( r_id );
 	}
 
 	//  请求封装
 	const FETCH = {
-		fetch: function (args) {
-			let obj = Object.assign( {}, args, {
-				url:config.url + args.url
+		get: function ( args ) {
+			let { url , timeout } = args;
+			let ajax = new Promise(( resolve ,reject )=>{
+			 	nativeFetch.fetch({
+					url: config.url + url,
+					success:function(data){
+						resolve(data);
+					},
+					fail:function(data, code){
+						resolve(data);
+					}
+				});
 			});
-			nativeFetch.fetch(obj);
-		},
-		get: function (args) {
-			args.method = "GET";
-			return this.fetch(args);
-		},
-		post: function (args) {
-			args.method = "POST";
-			return this.fetch(args);
+			let timeout_fn = new Promise(( resolve ,reject ) =>{
+				setTimeout(() => {
+					resolve({ code:204, massage:'请求超时'});
+				}, 3000);
+			});
+			return Promise.race([ timeout_fn , ajax]);
 		}
 	};
+	/**
+	 * 发送日志 , 只用于发送数据
+	 * @param {string} args  数据
+	 * @param {string} actionType  请求类型
+	 */
+	function submitAction ( args ) {
+		console.log('==============submitAction======================');
+		console.log( toString(args) );
+		console.log('===============submitAction=====================');
+		// let type = actionType || "";
+		// JSON转为查询字符串
+		let queryStr = toQueryString(args); 
+		// 提交日志
+		return FETCH.get( { url:"/a.gif?" + queryStr } )
+	}
 
-		//  storage key : 所有缓存数据
-	const STORAGE_DATA_KEY = "APP_STATISTICS_DATA",
-		// cuid key
-		CUID_KEY = "_SD_BD_CUID_",
-		// requestId key
-		REQ_KEY = "_SD_BD_REQUEST_ID_";
 
 	// 设置缓存 
 	function setStorage( ...args ){
@@ -188,15 +210,15 @@ import APP_CONFIG from './statistics.config';
 				key: args[0],
 				value: args[1] || '',
 				success: function (data) {
-					resolve( data );
+					resolve( !0 );
 				},
 				fail: function (data, code) {
-					reject();
+					resolve( !1 );
 				}
 			})
 		})
 	}
-	// 设置缓存 
+	// 读取缓存 
 	function getStorage( key ){
 		return new Promise((resolve, reject) => {
 			storage.get({
@@ -205,13 +227,13 @@ import APP_CONFIG from './statistics.config';
 					resolve( data );
 				},
 				fail: function (data, code) {
-					reject();
+					resolve( !1 );
 				}
 			})
 		})
 	}
 	// 删除缓存 
-	function getStorage( key ){
+	function delStorage( key ){
 		return new Promise((resolve, reject) => {
 			storage.delete({
 				key: key,
@@ -219,7 +241,7 @@ import APP_CONFIG from './statistics.config';
 					resolve( data );
 				  },
 				fail: function (data, code) {
-					reject();
+					resolve( !1 );
 				}
 			})
 		})
@@ -231,22 +253,26 @@ import APP_CONFIG from './statistics.config';
 				device.getId({
 					type: ['device', 'mac' , 'user'],
 					success: function ( data ) {
-						resolve( data )
+						// console.log('获取deviceIds成功');
+						resolve( data );
 					},
 					fail: function ( data , code ) {
-						reject({})
+						// console.log('获取deviceIds失败');
+						resolve({});
 					}
 				})
-			})
+			})		
 		},
 		deviceInfos(){
 			return new Promise(( resolve, reject ) => {
 				device.getInfo({
 					success: function( data ){
-						resolve( data )
+						resolve( data );
+						console.log('获取 device getInfo 成功');
 					},
 					fail: function(){
-						reject({})
+						resolve( {} );
+						console.log('获取 device getInfo 失败');
 					}
 				})
 			})
@@ -255,89 +281,328 @@ import APP_CONFIG from './statistics.config';
 			return new Promise(( resolve, reject ) => {
 				network.getType({
 					success: function (data) {
-						resolve( data )
+						resolve( data );
+						
+						console.log('获取network getType 成功');
 					},
 					fail: function () {
-						reject({})
+						resolve( {} )
+						console.log('获取network getType 失败');
 					}
 				});	
-			})					
+			})				
 		}
 	};
+
+	//  storage key : 用户信息数据
+	const STORAGE_DATA_KEY = "APP_STATISTICS_DATA",
+	// cuid key
+	CUID_KEY = "_SD_BD_CUID_",
+	// requestId key
+	// REQ_KEY = "_SD_BD_REQUEST_ID_",
+	PAGE_START_KEY = "_SD_BD_PAGE_START_",
+
+	APP_STATISTICS_LOGS = "_APP_STA_UNSEND_LOGS_";	
+
+	// 
+
 	// 初始化数据
-	const sta_data = {
-		public:{},
+	const BASE_DATA = {
+		sdk_vision: '1.2.0.0',
+		debug: 1,
+	};
+	// 日志状态
+	const LOG_STATE = {
+		has_init_storage: !1,
+		has_cuid_storage: !1,
+		has_request_id_storage: !1,
 	};
 
-	class Wanka_app_sta {
+	class Wanka_statistic {
 
-		constructor( name ){
+		constructor(){
 			this.state = {
-				cuid: ''
+				data: null,
+				page: null,
+				is_entry: 1,
+				cuid:'',
+				req: '',
 			};
 			this.init = this.init.bind( this );
-			this.setStorage = this.setStorage.bind( this );
-			this.init();
+			this.page_stat = this.page_stat.bind( this );
+			this.page_end = this.page_end.bind( this );
+			this.merge_datas = this.merge_datas.bind( this );
 		}
-		init (){
-			console.log( 'name' , this.state.cuid );
-		}
-		getCuid (){
-			getStorage( CUID_KEY )
-			.then(data => {
-				// this.state = data.
-			})
-			.catch(() => {
-				createCuid();
-			})
-		}
-		setStorage (){
+		init ( app_data ){
+			let datas = {};
+			// 兼容华为
+			let APP = app_data || {
+				_def: {}
+			};
+			APP._def = APP._def || {
+				manifest: {}
+			};
+			// 解构出  env 和 manifest 对象
+			let {
+				_def: {
+					manifest
+				}
+			} = APP;
+			let app_info = app.getInfo();
 
-		}
-		submitAction (){
+			// app 基础信息
+			datas.package = manifest.package || app_info.packageName;
+			datas.versionName = manifest.versionName || app_info.versionName;
+			datas.minPlatformVersion = manifest.minPlatformVersion;
+			datas.channel = account.getProvider();
+			datas.name = manifest.name || app_info.name;
 
+			// 获取设备数据
+			Promise.all([ DATAS_API.deviceInfos() , DATAS_API.deviceIds(), DATAS_API.netType() ])
+
+				.then(res => {
+					
+					let user_all_data =  Object.assign( datas , ...res ); 
+					// 日志相关数据
+					let public_data = {};
+					// 获取cuid
+					getStorage(CUID_KEY)						
+						.then(res => {
+							
+							if( res ){
+								public_data.cuid = res;
+							}else{
+								public_data.cuid = createCuid( user_all_data.client_id || '' );
+							}			
+							this.state.cuid = public_data.cuid;				
+							public_data.req = this.state.req = createRequestId( public_data.cuid );
+	
+							// 保存数据
+							let user_data = this.state.data = { ...format_datas.device( user_all_data , this.state.cuid ) , ...format_datas.public( public_data ) };					
+							// 设置数据缓存
+							setStorage( STORAGE_DATA_KEY , toString( user_data ) )
+								.then( res => {
+									if( res ){ 
+										LOG_STATE.has_init_storage = !0;
+									}
+								});
+							setStorage( CUID_KEY , public_data.cuid )
+								.then( res => {
+									if( res ){
+										LOG_STATE.has_cuid_storage = !0;
+									}
+								});
+							// setStorage( REQ_KEY , public_data.req )
+							// 	.then( res => {
+							// 		LOG_STATE.has_request_id_storage = !0;
+							// 	});							
+						})							
+				})
 		}
+		page_stat( pageData ){
+			console.log( 'this.state.data >>>> page start');
+			let {name , path} = router.getState();			
+			this.state.page = {
+				sta_time: Date.now(),
+				page_path: name || '', 
+				page_path: path || '',
+				is_entry: this.state.is_entry,
+			};			
+			this.state.is_entry = 0; 
+			setStorage( PAGE_START_KEY , this.state.page )
+				.then( res => {
+					// LOG_STATE.has_init_storage = !0;
+				});
+		}
+		page_end( pageData ){
+			console.log( 'this.state.data >>>> page hide');
+			if( !this.state.cuid && !this.state.data ) return
+
+			let end_time = Date.now();
+			if( this.state.page ){
+				this.state.page.duration = end_time - this.state.page.sta_time;
+				this.state.page.end_time = end_time;
+				this.merge_datas();
+			}
+			else{
+				getStorage( PAGE_START_KEY )
+				.then( res => {
+					let result = JSON.parse( res );
+					if( result ){ 
+						result.duration = end_time - result.sta_time;
+						let datas = Object.assign( result , { end_time } );
+						this.state.page = datas;
+						this.merge_datas();					
+					}
+				});
+			}
+		}
+		// 合并基础数据和上次页面数据
+		merge_datas(){
+			let log_data = {};
+			if( this.state.data && this.state.page ){
+				log_data = {
+					...this.state.data,
+					...this.state.page
+				};
+				console.log('req >>>>>>' , log_data.request_id );
+
+				// 发送日志
+				submitAction( log_data )
+				.then(res => {
+					if( res.code == 200 ){	
+						console.log('提交日志成功' , toString(res) );
+					}else{									
+						console.log('提交日志失败');
+					}				
+				})
+				.catch(err => {
+					console.log('提交日志失败');
+				});				
+				
+				//  提交日志失败时， 缓存日志 ？？？ 未确定
+				getStorage(APP_STATISTICS_LOGS)
+					.then( res =>{
+						let log_list = null;
+						if( res ){
+							log_list = JSON.parse( res );
+						}else{
+							log_list = [];
+						}
+						log_list.push( log_data );
+						// setStorage(APP_STATISTICS_LOGS , toString( log_list ) );
+						
+						// submitAction( log_data )
+						// 	.then(res => {
+						// 		if( res.code == 200 ){	
+						// 			console.log('提交日志成功' , toString(res) );
+						// 		}else{									
+						// 			console.log('提交日志失败');
+						// 		}				
+						// 	})
+						// 	.catch(err => {
+						// 		console.log('提交日志失败');
+						// 	});
+					});				
+			}
+		}
+	}
+
+	// format_data 格式化数据
+	const format_datas = {
+		
+		device( args , cuid ){
+			return {
+				package: args.package || '',
+				// 来源平台
+				channel: args.channel || '', 
+				// 快应用名称
+				name: args.name || '',
+				// 快应用 版本
+				svr: args.versionName || '', 
+				// 设备唯一id
+				client_id: encrypt(args.device || '' , cuid ),
+				// mac
+				info_ma: encrypt(args.mac || '' , cuid),
+				// 用户唯一id
+				os_id: encrypt(args.user || '' , cuid ), 
+				// 品牌
+				make: (args.brand || '').toLowerCase(), // => make
+				// 生产厂商
+				manufacturer: (args.manufacturer || '').toLowerCase(),
+				// 型号
+				model: (args.model || '').toLowerCase(),
+				// 产品名称
+				product: args.product || '',
+				// 操作系统
+				os_type: args.osType || '',
+				// 系统版本
+				ovr: args.osVersionName || '', 
+				// 平台版本
+				platform_version_name: args.platformVersionName || '',
+				// 语言
+				language: args.language || '',
+				// 地区
+				region: args.region || '',
+				screen_width: args.screenWidth || '',
+				screen_height: args.screenHeight || '',
+				// 网络类型
+				net_type: args.type || '',	
+			};
+
+		},
+		page( args ){
+			return {
+				page_name: '',
+				page_path: '',
+				sta_time: '',
+				end_time: '',
+				duration: '',
+				is_entry: !1,				
+			}
+		},
+		public( args ){
+			return {
+				app_id : APP_CONFIG.app_key || '',
+				cuid: args.cuid,			
+				// 请求id
+				request_id: args.req,
+				en_code : 'cuid'
+			}
+		}
+	};
+
+	let $statistic = new Wanka_statistic;	
+
+	// page 高级接入方式处理 
+	function Page_Config(args){
+		let show = args.onShow,
+			hide = args.onHide;
+		args.onShow = function(){
+			API.page_show( this );
+			show && show.call( this );
+		}
+		args.onHide = function(){
+			API.page_hide( this );
+			hide && hide.call( this );
+		}
+		return args;
 	}
 
 	// 接口暴露
 	const API = {
 		open_app( app_info ){
 			try {
-				new Wanka_app_sta('测试');
-				console.log('============ 打开app ========================');
-				console.log( 'app_info >>>>>>>' , JSON.stringify( app_info ) );
-				console.log('============ 打开app ========================');
+				$statistic.init( app_info );
+				delStorage(APP_STATISTICS_LOGS);
 			} catch (error) {
-				console.log('============ 打开app error ========================');
-				console.log(error.massage);
-				console.log('============ 打开app error ========================');
+
 			}
 		},
-		closed_app(){
-			try {
-				new Wanka_app_sta('测试');
-			} catch (error) {
-				console.log('============ 关闭app error ========================');
-				console.log( 'error info' , error.massage);
-				console.log('============ 关闭app error ========================');
-			}
-		},
+		// closed_app(){
+		// 	try {
+		// 		new Wanka_statistic('测试');
+		// 	} catch (error) {
+
+		// 	}
+		// },
 		page_show(page_info){
 			try {
-				new Wanka_app_sta('测试');
+				// let statistic = new Wanka_statistic;
+				console.log('============ 打开页面 ========================');
+				
+				$statistic.page_stat( page_info );
 			} catch (error) {
-				console.log('============ show_page error ========================');
-				console.log( 'error info' , error.massage);
-				console.log('============ show_page error ========================');
+				console.log('============ error ========================' );
 			}
 		},
 		page_hide(page_info){
 			try {
-				new Wanka_app_sta('测试');
+				// let statistic = new Wanka_statistic;
+				console.log('============ 关闭页面 ========================');
+				$statistic.page_end( page_info );
 			} catch (error) {
-				console.log('============ page_hide error ========================');
-				console.log( 'error info' , error.massage);
-				console.log('============ page_hide error ========================');
+
 			}
 		},
 		custom_track( id , args ){
@@ -345,495 +610,21 @@ import APP_CONFIG from './statistics.config';
 		}
 	}
 
-	// 统计
-	const APP_STATISTICS = {
-		// 基础信息
-		baseData: {
-			package: "", // 应用包名：应用的唯一标识 
-
-			// 来源平台
-			packageName: "", //发送日志时，key 需要修改  =>  channel
-
-			// 快应用名称
-			name: "",
-
-			// 快应用 版本
-			appVersionName: "", //发送日志时，key 需要修改  =>  svr
-
-			// 设备唯一id
-			device: "", //发送日志时，key 需要修改  => clientId
-
-			mac: "",
-
-			// 用户唯一id
-			user: "", //发送日志时，key 需要修改  => osId
-
-			// cuid 未授权时，js 生成的用户id
-			cuid: "",
-
-			// 请求id
-			requestId: "",
-
-			// 是否加密
-			hasEncrypt: "1",
-
-			// 接口类型 ： 接口类型 ， 在发送请求的之前增加。
-			// "actioin":""
-		},
-
-		// 设备信息
-		deviceInfo: {
-			// 品牌
-			brand: "", // => make
-			// 生产厂商
-			manufacturer: "",
-			// 型号
-			model: "",
-			// 产品名称
-			product: "",
-			// 操作系统
-			osType: "",
-			// 系统版本
-			osVersionName: "", // => ovr
-			// "osVersionCode":"",
-			// 平台版本
-			platformVersionName: "",
-			// "platformVersionCode":"",
-
-			// 语言
-			language: "",
-
-			// 地区
-			region: "",
-
-			screenWidth: "",
-			screenHeight: "",
-
-			// 网络类型
-			netType: ""
-		},
-
-		// 地理位置
-		location: {
-			longitude: 0,
-			latitude: 0
-		},
-		// router信息
-		routeInfo: {
-			page_name: '',
-			page_path: ''
-		},
-
-		// 获取唯一 id 授权状态
-		deviceIdWarrant: false,
-		// 设备信息授权状态
-		deviceInfoWarrant: false,
-		// 地理位置授权状态
-		getLocationWarrant: false,
-		// 网络类型授权状态
-		networkWarrant: false,
-
-		// 打开app
-		createApp(deviceData) {
-
-			const APP = deviceData || {
-				options: {},
-				_def: {}
-			};
-
-			// 兼容华为
-			APP.options = APP.options || {
-				env: {}
-			};
-			APP._def = APP._def || {
-				manifest: {}
-			};
-
-			let d = new Date();
-			// 解构出  env 和 manifest 对象
-			let {
-				options: {
-					env
-				},
-				_def: {
-					manifest
-				}
-			} = APP;
-
-			// console.log( `options=` ,JSON.stringify( APP.options ));
-			// 获取 packageName 值
-			// let {
-			// 	source
-			// } = app.getInfo();
-
-			// 渠道数据 account.getProvider()
-			APP_STATISTICS.baseData.packageName = account.getProvider();
-
-			// 缓存 reqestId
-			storage.set({
-				key: REQ_KEY,
-				value: APP_STATISTICS.baseData.requestId
-			});
-
-			// 读取 cuid
-			APP_STATISTICS.getCuid();
-
-			for (let key in APP_STATISTICS.baseData) {
-				if (APP_STATISTICS.baseData.hasOwnProperty(key)) {
-					// 应用信息保存
-					if (manifest[key]) {
-						APP_STATISTICS.baseData[key] = manifest[key];
-					} else if (env[key]) {
-						APP_STATISTICS.baseData[key] = env[key];
-					}
-				}
-			}
-
-			// 获取授权信息
-			APP_STATISTICS.getWarrantData();
-
-			// 初始化页面跳转监听
-			APP_STATISTICS.watchRouter((route) => {
-
-				APP_STATISTICS.routeInfo.page_name = route.name;
-				APP_STATISTICS.routeInfo.page_path = route.path;
-
-				// console.log( `路由变化了，路劲是：${ route.path },页面名称是：${ route.name }`);
-				let args = Object.assign({},
-					APP_STATISTICS.baseData,
-					APP_STATISTICS.deviceInfo,
-					APP_STATISTICS.location,
-					APP_STATISTICS.routeInfo
-				);
-				APP_STATISTICS.submitAction(APP_STATISTICS.handleData(args), '2');
-
-			});
-		},
-		// 获取授权信息
-		getWarrantData() {
-			// 读取设备id和用户id
-			device.getId({
-				type: ["device", "mac", "user"],
-				success: function (data) {
-					APP_STATISTICS.baseData.device = data.device;
-					APP_STATISTICS.baseData.mac = data.mac;
-					APP_STATISTICS.baseData.user = data.user;
-				},
-				fail: function (data, code) {
-					APP_STATISTICS.getCuid();
-				},
-				complete: function () {
-					APP_STATISTICS.deviceIdWarrant = true;
-				}
-			});
-			// 获取设备信息
-			device.getInfo({
-				success: function (data) {
-					for (const key in APP_STATISTICS.deviceInfo) {
-						if (data.hasOwnProperty(key)) {
-							APP_STATISTICS.deviceInfo[key] = data[key];
-						}
-					}
-					// 品牌、型号、生产厂家 统一转换小写
-					APP_STATISTICS.deviceInfo.brand = APP_STATISTICS.deviceInfo.brand.toLowerCase();
-					APP_STATISTICS.deviceInfo.model = APP_STATISTICS.deviceInfo.model.toLowerCase();
-					APP_STATISTICS.deviceInfo.manufacturer = APP_STATISTICS.deviceInfo.manufacturer.toLowerCase();
-				},
-				complete: function () {
-					APP_STATISTICS.deviceInfoWarrant = true;
-				}
-			});
-
-			// 获取地理位置
-			geolocation.getLocation({
-				success: function (data) {
-					//  经度、纬度
-					APP_STATISTICS.location.longitude = data.longitude;
-					APP_STATISTICS.location.longitude = data.latitude;
-				},
-				complete: function () {
-					APP_STATISTICS.getLocationWarrant = true;
-				}
-			});
-
-			// 获取网络状况
-			network.getType({
-				success: function (data) {
-					APP_STATISTICS.deviceInfo.netType = data.type;
-				},
-				complete: function () {
-					APP_STATISTICS.networkWarrant = true;
-				}
-			});
-
-			// 监测用户是否完成授权
-			this.lisenerWarranting();
-		},
-
-		// 读取cuid ，没有时， 生成cuid
-		getCuid() {
-			storage.get({
-				key: CUID_KEY,
-				success: function (data) {
-					let rid = "";
-					if (data) {
-						rid = data;
-					} else {
-						rid = APP_STATISTICS.createCuid();
-						storage.set({
-							key: CUID_KEY,
-							value: rid
-						});
-					}
-					APP_STATISTICS.baseData.cuid = rid;
-				},
-				fail: function (data, code) {
-
-					let rid = APP_STATISTICS.createCuid();
-					storage.set({
-						key: CUID_KEY,
-						value: rid
-					});
-					APP_STATISTICS.baseData.cuid = rid;
-				}
-			});
-		},
-
-		// 设置缓存
-		setStorage() {
-			// 缓存数据
-			let data = {
-				baseData: APP_STATISTICS.baseData,
-				deviceInfo: APP_STATISTICS.deviceInfo,
-				location: APP_STATISTICS.location,
-				routeInfo: APP_STATISTICS.routeInfo,
-				creteTime: new Date()
-			};
-
-			// storage.delete({
-			// 	key: STORAGE_KEY
-			// });
-
-			storage.set({
-				key: STORAGE_KEY,
-				value: JSON.stringify(data),
-				success: function () {}
-			});
-		},
-
-		// 读取缓存
-		getStorage() {
-			let that = this;
-			storage.get({
-				key: STORAGE_KEY,
-				success: function (data) {
-					let storageData = data && JSON.parse(data);
-
-					if (storageData) {
-						delete storageData.creteTime;
-						// 保存数据
-						Object.assign(APP_STATISTICS, storageData);
-					} else {
-						// 没有缓存 ， 申请用户授权，获取数据
-						that.getWarrantData();
-					}
-				},
-				fail: function () {
-					// 没有缓存 ， 申请用户授权，获取数据
-					that.getWarrantData();
-				}
-			});
-		},
-
-		// 监听用户是否完成授权行为 （ 包含通过、未通过 ）
-		lisenerWarranting() {
-			const timer = setInterval(() => {
-				// 所有授权完成，发送日志
-				if (
-					this.deviceIdWarrant &&
-					this.deviceInfoWarrant &&
-					this.getLocationWarrant &&
-					this.networkWarrant
-				) {
-					clearInterval(timer);
-					// 路由信息
-					let routerInfo = router.getState() || {};
-					APP_STATISTICS.routeInfo.page_name = routerInfo.name || '';
-					APP_STATISTICS.routeInfo.page_path = routerInfo.path || '';
-
-
-					let args = Object.assign({},
-						APP_STATISTICS.baseData,
-						APP_STATISTICS.deviceInfo,
-						APP_STATISTICS.location,
-						APP_STATISTICS.routeInfo
-					);
-
-					// 缓存数据
-					APP_STATISTICS.setStorage();
-
-					// 读取 requestId
-					storage.get({
-						key: REQ_KEY,
-						success: function (data) {
-							args.requestId = data;
-							let encryptArgs = APP_STATISTICS.handleData(args);
-							APP_STATISTICS.submitAction(encryptArgs, '1');
-						},
-						fail: function () {
-							args.requestId = APP_STATISTICS.baseData.requestId;
-							let encryptArgs = APP_STATISTICS.handleData(args);
-							APP_STATISTICS.submitAction(encryptArgs, '1');
-						}
-					});
-				}
-			}, 10);
-		},
-
-		/**
-		 * @description 监听页面切换
-		 * @param 页面切换后执行的回调
-		 */
-		watchRouter(cb) {
-			let lastLen = router.getLength();
-			let lastPath = router.getState() && router.getState().path;
-			setInterval(() => {
-
-				let routerLen = router.getLength();
-				let path = router.getState() && router.getState().path;
-				if (lastPath !== path || lastLen !== routerLen) {
-					if (lastPath) {
-						cb && cb(router.getState());
-					}
-					lastLen = routerLen;
-					lastPath = path;
-					let routerInfo = router.getState() || {};
-					APP_STATISTICS.routeInfo.page_name = routerInfo.name || '';
-					APP_STATISTICS.routeInfo.page_path = routerInfo.path || '';
-				}
-			}, 200);
-		},
-
-		/**
-		 *
-		 * @description 生成 cuid. 生成机制 : 时间戳  + '-' + 四位随机字符串 + '-' + 四位随机字符串 + '-' + 四位随机字符串
-		 * @returns string 
-		 */
-		createCuid() {
-			let id = "";
-			let d = new Date();
-
-			function randomStr() {
-				return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
-			}
-
-			id = d.getTime() + "-" + randomStr() + "-" + randomStr() + "-" + randomStr();
-
-			return id;
-		},
-
-		/**
-		 * 格式化日志数据
-		 * @param {object} args 原始数据
-		 */
-		handleData(args) {
-			// key值替换 ：统一修改为公司规定字段
-			let newKeys = {
-				packageName: "channel",
-
-				appVersionName: "svr",
-
-				device: "clientId",
-
-				user: "osId",
-
-				brand: "make",
-
-				osVersionName: "ovr",
-
-				mac: "infoMa"
-			};
-
-			// 加密参数 : 注意， 这里的 key 是经过 newKeys 转换后的 key
-			let encryptArgs = ["clientId", "osId", "cuid", "infoMa"];
-
-			// key值命名转换： 驼峰式 转为 下划线式
-			let change_args = {};
-			for (const key in args) {
-				if (args.hasOwnProperty(key)) {
-					// key 替换
-					let newKey = newKeys[key] || key;
-
-					// 检查参数是否需要加密
-					let index = encryptArgs.findIndex(item => {
-						return item === newKey;
-					});
-
-					if (index < 0) {
-						// 不需要加密
-						change_args[getKebabCase(newKey)] = args[key];
-					} else {
-						// 加密
-						change_args[getKebabCase(newKey)] = encrypt(args[key], args["requestId"]);
-					}
-				}
-			}
-			return change_args;
-		},
-
-		/**
-		 * 发送日志 , 只用于发送数据
-		 * @param {object} args  数据
-		 * @param {string} actionType  请求类型
-		 */
-		submitAction(args, actionType) {
-			let type = actionType || "";
-
-			args.action = type;
-			args.app_id = APP_CONFIG.app_key;
-			// JSON转为查询字符串
-			let argsToQueryStr = toQueryString(args);
-
-			// console.log(`参数查看：>> ${JSON.stringify(args)} `);
-			// console.log(`cuid:${ decrypt(args.cuid, args.request_id) }`); 
-			// 提交日志
-			FETCH.get({
-				url: "/a.gif?" + argsToQueryStr,
-				success(data) {
-					// if (data.code === 200) {
-					// 	// 关闭之前设置缓存
-					// 	console.log(`日志发送成功code= ${data.code}`); 
-					// }
-				}
-			});
-		},
-
-		/**
-		 * 发送关闭 app 日志
-		 *
-		 */
-		destroyLog() {
-
-			let args = Object.assign({},
-				APP_STATISTICS.baseData,
-				APP_STATISTICS.deviceInfo,
-				APP_STATISTICS.location,
-				APP_STATISTICS.routeInfo
-			);
-			APP_STATISTICS.submitAction(APP_STATISTICS.handleData(args), '0');
-
-		}
+	// 全局变量
+	const hookTo = global.__proto__ || global;
+	hookTo.APP_STATISTICS = {
+		'app_sta_init': API.open_app,
+		'page_show': API.page_show,
+		'page_hide': API.page_hide
 	};
-
+	hookTo.Custom_page = Page_Config;
 	return {
 		'app_sta_init': API.open_app,
-		'app_destroy': API.closed_app
+		'page_show': API.page_show,
+		'page_hide': API.page_hide
+		// 'app_destroy': API.closed_app
 	}
 
-	// return {
-	// 	'app_sta_init': APP_STATISTICS.createApp,
-	// 	'app_destroy': APP_STATISTICS.destroyLog
-	// }
 });
 
 // // 全局变量
@@ -845,7 +636,3 @@ import APP_CONFIG from './statistics.config';
 // 	app_destroy: APP_STATISTICS.destroyLog
 // };
 
-// export default {
-// 	app_sta_init: APP_STATISTICS.createApp,
-// 	app_destroy: APP_STATISTICS.destroyLog
-// };

@@ -87,16 +87,18 @@ export default {
   },
   reforce(){
       
-      this.$forceUpdate();
+    this.$forceUpdate();
   },
   onShow(){
-        $umeng_stat.resume(this) //在onShow方法的第一行加入此代码
+        // $umeng_stat.resume(this) //在onShow方法的第一行加入此代码
         //App业务代码
+        APP_STATISTICS.page_show( this );
     },
     onHide() {
-        $umeng_stat.pause(this);//在onHide方法的第一行加入此代码
+        // $umeng_stat.pause(this);//在onHide方法的第一行加入此代码
         //App业务代码
-    }    
+        APP_STATISTICS.page_hide( this );
+    }   
 
 }
 </script>
