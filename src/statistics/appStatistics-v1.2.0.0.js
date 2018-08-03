@@ -5,6 +5,7 @@ import device from "@system.device";
 import geolocation from "@system.geolocation";
 import network from "@system.network";
 import account from "@service.account";
+import shortcut from '@system.shortcut';
 import md5 from 'md5';
 
 // 不需要声明的全局模块
@@ -179,9 +180,6 @@ import APP_CONFIG from './statistics.config';
 	 * @param {string} actionType  请求类型
 	 */
 	function submitAction ( queryStr ) {
-		console.log('==============submitAction======================');
-		console.log( queryStr );
-		console.log('===============submitAction=====================');
 		// let type = actionType || "";
 		// JSON转为查询字符串
 		// let queryStr = toQueryString(args); 
@@ -255,11 +253,9 @@ import APP_CONFIG from './statistics.config';
 				device.getInfo({
 					success: function( data ){
 						resolve( data );
-						console.log('获取 device getInfo 成功');
 					},
 					fail: function(){
 						resolve( {} );
-						console.log('获取 device getInfo 失败');
 					}
 				})
 			})
@@ -268,16 +264,25 @@ import APP_CONFIG from './statistics.config';
 			return new Promise(( resolve, reject ) => {
 				network.getType({
 					success: function (data) {
-						resolve( data );
-						
-						console.log('获取network getType 成功');
+						resolve( data );						
 					},
 					fail: function () {
 						resolve( {} )
-						console.log('获取network getType 失败');
 					}
 				});	
 			})				
+		},
+		has_shortcut(){
+			return new Promise( ( resolve, reject )=>{
+				shortcut.hasInstalled({
+					success: function ( bl ) {
+						resolve( { has_iocn: bl } );
+					},
+					fail:function ( bl ) {
+						resolve( { has_iocn: 0 }  );
+					}
+				  });
+			})
 		}
 	};
 
@@ -288,7 +293,7 @@ import APP_CONFIG from './statistics.config';
 
 	// 初始化数据
 	const BASE_DATA = {
-		sdk_vision: '1.2.0.0',
+		sdk_version: '1.2.0.0',
 		debug: 1,
 	};
 	// 日志状态
@@ -341,7 +346,7 @@ import APP_CONFIG from './statistics.config';
 			datas.name = manifest.name || app_info.name;
 
 			// 获取设备数据
-			Promise.all([ DATAS_API.deviceInfos() , DATAS_API.deviceIds(), DATAS_API.netType() ])
+			Promise.all([ DATAS_API.deviceInfos() , DATAS_API.deviceIds(), DATAS_API.netType(),DATAS_API.has_shortcut() ])
 
 				.then(res => {
 					
@@ -426,7 +431,7 @@ import APP_CONFIG from './statistics.config';
 				submitAction( toQueryString(log_data) )
 				.then(res => {
 					if( res.code == 200 ){	
-						console.log('提交日志成功' , toString(res) );
+						
 						this.send_queue();
 					}else{									
 						
@@ -508,7 +513,7 @@ import APP_CONFIG from './statistics.config';
 				// 网络类型
 				net: args.type || '',	
 				// 是否创建图标
-				has_iocn: ''
+				has_iocn: ( args.has_iocn || 0 )
 			};
 		},
 		page( args ){
@@ -566,22 +571,18 @@ import APP_CONFIG from './statistics.config';
 		},
 		page_show(page_info){
 			try {
-				console.log('============ 打开页面 ========================');
 				if( LOG_STATE.has_init ){
 					$statistic.page_stat( page_info );
 				}
 			} catch (error) {
-				console.log('============ error ========================' );
 			}
 		},
 		page_hide(page_info){
 			try {
-				console.log('============ 关闭页面 ========================');
 				if( LOG_STATE.has_init ){
 					$statistic.page_end( page_info );
 				}
 			} catch (error) {
-				console.log('============ error ========================' );
 			}
 		},
 		custom_track( id , args ){

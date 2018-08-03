@@ -16,7 +16,11 @@ var baseDir = "../src/statistics";
 
 
 // 基础文件
-var baseFiles = [baseDir + '/aes.js'  , baseDir + '/appStatistics-v1.2.0.0.js' ];
+
+var baseFiles = [baseDir + '/aes.js'  , baseDir + '/appStatistics-v3.js' ];
+
+// 版本 1.0.0.0
+// var baseFiles = [baseDir + '/aes.js'  , baseDir + '/appStatistics-v1.2.0.0.js' ];
 
 // var allFils;
 

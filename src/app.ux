@@ -29,16 +29,7 @@
       STA.app_sta_init( this );
       // APP_STATISTICS.app_sta_init( this ); 
       console.log('=============app 打开了 =======================');
-      // console.log( 'app.getInfo(' , JSON.stringify(app.getInfo()))
-      // 友盟 sdk 
-      // $umeng_stat.init(this);
 
-      // 检测是否创建了桌面图标
-      // shortcut.hasInstalled({
-      //   success: function ( bl ) {
-      //     console.log('检测是否创建了桌面图标' , bl )
-      //   }
-      // });
 
     },
     onDestroy () {

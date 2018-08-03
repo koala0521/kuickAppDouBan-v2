@@ -276,6 +276,7 @@ import APP_CONFIG from './statistics.config';
 					manifest
 				}
 			} = APP;
+			isEmptyObject( manifest) &&  (manifest = app.getInfo());
 			// console.log( `options=` ,JSON.stringify( APP.options ));
 			// 获取 packageName 值
 			// let {
@@ -643,11 +644,19 @@ import APP_CONFIG from './statistics.config';
 
 		}
 	};
+	// 全局变量
+	const hookTo = global.__proto__ || global;
+	// 只暴露接口
+	hookTo.APP_STATISTICS = {
+		app_sta_init: APP_STATISTICS.createApp,
+		app_destroy: APP_STATISTICS.destroyLog
+	};		
 
 	return {
 		'app_sta_init': APP_STATISTICS.createApp,
 		'app_destroy': APP_STATISTICS.destroyLog
 	}
+
 });
 
 // // 全局变量

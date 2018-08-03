@@ -99,7 +99,6 @@ export default {
         //App业务代码
         APP_STATISTICS.page_hide( this );
     }   
-
 }
 </script>
 
