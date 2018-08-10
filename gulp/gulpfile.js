@@ -34,6 +34,9 @@ var config = {
     ],
     prod:[
         baseDir + "/prod.config.js"
+    ],
+    sand:[
+        baseDir + "/sand.config.js"
     ]
 };
 
@@ -48,6 +51,9 @@ var tasks = {
     },
     prod(){
         gulp.start(['prod']);
+    },
+    sand(){
+        gulp.start(['sand']);
     },
 };
 
@@ -90,6 +96,20 @@ gulp.task('test',function(){
 }) 
 
 // 沙盒打包
+gulp.task('sand',function(){  
+
+    // 合并依赖
+    let allFils = init();
+
+    return gulp.src( allFils )
+        .pipe(concat('appStatistics.js'))
+        .pipe( rename({ extname: '.min.js' }) )        
+        .pipe( sourcemaps.init() )
+        .pipe( uglify_es(/* options */) )        
+        .pipe( sourcemaps.write("./") ) 
+        .pipe(gulp.dest('./dist'));
+}) 
+// 上线打包
 gulp.task('prod',function(){  
     // 合并依赖
     let allFils = init();

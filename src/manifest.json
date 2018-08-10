@@ -1,9 +1,9 @@
 {
-  "package": "com.wankaTestDemo.test04",
+  "package": "com.wankaTestDemo.test05",
   "name": "sdk测试demo",
   "versionName": "1.0.0",
-  "versionCode": "1",
-  "minPlatformVersion": "1000",
+  "versionCode": 1,
+  "minPlatformVersion": 1000,
   "icon": "/Common/logo.png",
   "features": [
     { "name": "system.prompt" },
