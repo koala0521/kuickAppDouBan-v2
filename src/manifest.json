@@ -1,6 +1,6 @@
 {
-  "package": "com.wankaTestApp.demo",
-  "name": "统计sdk测试",
+  "package": "com.wankaTestDemo.test04",
+  "name": "sdk测试demo",
   "versionName": "1.0.0",
   "versionCode": "1",
   "minPlatformVersion": "1000",

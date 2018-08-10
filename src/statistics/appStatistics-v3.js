@@ -13,6 +13,7 @@ import router from '@system.router';
 
 // 配置文件
 import APP_CONFIG from './statistics.config';
+import { SSL_OP_NO_TICKET } from "constants";
 
 (function(global, factory){
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
@@ -158,7 +159,10 @@ import APP_CONFIG from './statistics.config';
 			return this.fetch(args);
 		}
 	};
-
+	let state = {
+		has_init_log: !1,
+		has_cuid: !1,
+	};
 	// 统计
 	const APP_STATISTICS = {
 		// 基础信息
@@ -276,12 +280,8 @@ import APP_CONFIG from './statistics.config';
 					manifest
 				}
 			} = APP;
+
 			isEmptyObject( manifest) &&  (manifest = app.getInfo());
-			// console.log( `options=` ,JSON.stringify( APP.options ));
-			// 获取 packageName 值
-			// let {
-			// 	source
-			// } = app.getInfo();
 
 			// 渠道数据 account.getProvider()
 			APP_STATISTICS.baseData.packageName = account.getProvider();
@@ -325,6 +325,9 @@ import APP_CONFIG from './statistics.config';
 					APP_STATISTICS.location,
 					APP_STATISTICS.routeInfo
 				);
+				
+				if( !state.has_init_log ) return  				
+				
 				APP_STATISTICS.submitAction(APP_STATISTICS.handleData(args), '2');
 
 			});
@@ -406,6 +409,7 @@ import APP_CONFIG from './statistics.config';
 						});
 					}
 					APP_STATISTICS.baseData.cuid = rid;
+					state.has_cuid = !0;
 				},
 				fail: function (data, code) {
 
@@ -415,6 +419,7 @@ import APP_CONFIG from './statistics.config';
 						value: rid
 					});
 					APP_STATISTICS.baseData.cuid = rid;
+					state.has_cuid = !0;
 				}
 			});
 		},
@@ -614,16 +619,15 @@ import APP_CONFIG from './statistics.config';
 			// JSON转为查询字符串
 			let argsToQueryStr = toQueryString(args);
 
-			// console.log(`参数查看：>> ${JSON.stringify(args)} `);
-			// console.log(`cuid:${ decrypt(args.cuid, args.request_id) }`); 
 			// 提交日志
 			NETWORK.get({
 				url: "/a.gif?" + argsToQueryStr,
 				success(data) {
-					// if (data.code === 200) {
-					// 	// 关闭之前设置缓存
-					// 	console.log(`日志发送成功code= ${data.code}`); 
-					// }
+					if (data.code === 200) {
+						if( actionType == 1 ){							
+							state.has_init_log = !1;
+						}
+					}
 				}
 			});
 		},
@@ -633,7 +637,7 @@ import APP_CONFIG from './statistics.config';
 		 *
 		 */
 		destroyLog() {
-
+			if( !state.has_init_log ) return  
 			let args = Object.assign({},
 				APP_STATISTICS.baseData,
 				APP_STATISTICS.deviceInfo,
@@ -641,7 +645,6 @@ import APP_CONFIG from './statistics.config';
 				APP_STATISTICS.routeInfo
 			);
 			APP_STATISTICS.submitAction(APP_STATISTICS.handleData(args), '0');
-
 		}
 	};
 	// 全局变量

@@ -2,7 +2,7 @@
 import storage from "@system.storage";
 import nativeFetch from "@system.fetch";
 import device from "@system.device";
-import geolocation from "@system.geolocation";
+// import geolocation from "@system.geolocation";
 import network from "@system.network";
 import account from "@service.account";
 import shortcut from '@system.shortcut';
@@ -90,11 +90,14 @@ import APP_CONFIG from './statistics.config';
 	 * @param {data} : 需要加密的字符串
 	 * @return : string 密文
 	*/
-	function encrypt( data, initKey ) {
-		let keyLen = 16;
-		// initKey 长度必须是16或者16的倍数
+	function encrypt( data, cid ) {
+
+		let initKey = md5('huanju@quickapp' + cid ).substring( cid.length / 2 ).toLowerCase();
+		// initKey 长度必须是16位
+
 		let key = CryptoJS.enc.Latin1.parse(initKey);
-		let iv = CryptoJS.enc.Latin1.parse(initKey);
+		
+		let iv = CryptoJS.enc.Latin1.parse('2018080716102000');
 
 		return CryptoJS.AES.encrypt(data, key, {
 			iv: iv,
@@ -106,15 +109,16 @@ import APP_CONFIG from './statistics.config';
 
 	/** 
 	 * @description : AES解密
-	 * @param : message 密文
+	 * @param { message }: string 密文
+	 * @param { cid }: 生成密钥的 key 
 	 * @return : decrypted string 明文
 	*/
-	function decrypt(message, initKey ) {
-		let keyLen = 16;
-		// initKey 长度必须是16或者16的倍数
+	function decrypt(message, cid ) {
 
+		let initKey = md5('huanju@quickapp' + cid ).substring( cid.length / 2 ).toLowerCase();
+		// initKey 长度必须是16位
 		let key = CryptoJS.enc.Latin1.parse(initKey);
-		let iv = CryptoJS.enc.Latin1.parse(initKey);
+		let iv = CryptoJS.enc.Latin1.parse('2018080716102000');
 
 		let decrypted = "";
 		decrypted = CryptoJS.AES.decrypt(message, key, {
@@ -276,10 +280,10 @@ import APP_CONFIG from './statistics.config';
 			return new Promise( ( resolve, reject )=>{
 				shortcut.hasInstalled({
 					success: function ( bl ) {
-						resolve( { has_iocn: bl } );
+						resolve( { has_icon: 1 } );
 					},
 					fail:function ( bl ) {
-						resolve( { has_iocn: 0 }  );
+						resolve( { has_icon: 0 }  );
 					}
 				  });
 			})
@@ -290,10 +294,9 @@ import APP_CONFIG from './statistics.config';
 	const CUID_KEY = "_SD_BD_CUID_",
 		// REQ_KEY = "_SD_BD_REQUEST_ID_",
 		PAGE_START_KEY = "_SD_BD_PAGE_START_";
-
 	// 初始化数据
 	const BASE_DATA = {
-		sdk_version: '1.2.0.0',
+		sdk_version: '1.2.0.1',
 		debug: 1,
 	};
 	// 日志状态
@@ -301,6 +304,7 @@ import APP_CONFIG from './statistics.config';
 		has_init: !1,
 		has_cuid_storage: !1,
 		has_request_id_storage: !1,
+		has_open_log: !1
 	};
 
 	class Wanka_statistic {
@@ -382,19 +386,20 @@ import APP_CONFIG from './statistics.config';
 			let {name , path} = router.getState();			
 			this.state.page = {
 				sta_time: Date.now(),
-				page_path: name || '', 
+				page_name: name || '', 
 				page_path: path || '',
 				is_entry: this.state.is_entry || 0,
 			};			
 			this.state.is_entry = 0; 
+			LOG_STATE.has_open_log = !0;
 			setStorage( PAGE_START_KEY , this.state.page )
 				.then( res => {
 					// LOG_STATE.has_init_storage = !0;
 				});
 		}
 		page_end( pageData ){
-
-			if( !this.state.cuid && !this.state.data ) return
+			
+			if( !this.state.cuid || !this.state.data ) return
 
 			let end_time = Date.now();
 			if( this.state.page ){
@@ -424,13 +429,14 @@ import APP_CONFIG from './statistics.config';
 					...this.state.page,
 					...BASE_DATA,
 				};
-				// console.log('req >>>>>>' , log_data.request_id );
-				// console.log('cuid >>>>>>' , log_data.cuid );
-
+				// console.log('data' , toString( log_data ) );
+				
 				// 发送日志
 				submitAction( toQueryString(log_data) )
 				.then(res => {
 					if( res.code == 200 ){	
+						
+						console.log('sucess');
 						
 						this.send_queue();
 					}else{									
@@ -489,7 +495,7 @@ import APP_CONFIG from './statistics.config';
 				// mac
 				info_ma: encrypt( args.mac || '' , cuid ),
 				// 用户唯一id
-				os_id: ( args.user || '' ), 
+				os_id: encrypt( args.user || '' , cuid ), 
 				// 品牌
 				make: (args.brand || '').toLowerCase(), 
 				// 生产厂商
@@ -513,7 +519,7 @@ import APP_CONFIG from './statistics.config';
 				// 网络类型
 				net: args.type || '',	
 				// 是否创建图标
-				has_iocn: ( args.has_iocn || 0 )
+				has_icon: ( args.has_icon || 0 )
 			};
 		},
 		page( args ){
@@ -532,7 +538,8 @@ import APP_CONFIG from './statistics.config';
 				cuid: args.cuid,			
 				// 请求id
 				req_id: args.req,
-				en_code : 'cuid'
+				en_code : 'cuid',
+				action: 2,
 			}
 		}
 	};
@@ -578,12 +585,15 @@ import APP_CONFIG from './statistics.config';
 			}
 		},
 		page_hide(page_info){
+			
 			try {
-				if( LOG_STATE.has_init ){
+				if( LOG_STATE.has_init && LOG_STATE.has_open_log ){
 					$statistic.page_end( page_info );
 				}
 			} catch (error) {
 			}
+			
+			LOG_STATE.has_open_log = !1;
 		},
 		custom_track( id , args ){
 			
