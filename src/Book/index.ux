@@ -164,16 +164,14 @@ export default {
       url: 'https://m.douban.com/book/subject/'+ this.id
     })
   },
-  onShow(){
-        // $umeng_stat.resume(this) //在onShow方法的第一行加入此代码
-        //App业务代码
-        APP_STATISTICS.page_show( this );
-    },
-    onHide() {
-        // $umeng_stat.pause(this);//在onHide方法的第一行加入此代码
-        //App业务代码
-        APP_STATISTICS.page_hide( this );
-    }   
+  // onShow(){
+  //       //App业务代码
+  //       APP_STATISTICS.page_show( this );
+  //   },
+  //   onHide() {
+  //       //App业务代码
+  //       APP_STATISTICS.page_hide( this );
+  //   }   
   
 }
 </script>

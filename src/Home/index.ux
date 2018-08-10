@@ -8,7 +8,7 @@
         <text class="head-title">{{menuList[currentIndex].type}}</text>
         <a href="/About">
             <image onclick="toSearch" class="head-search" src="../assets/search.png"></image>
-            引入自家SDK    
+            SDK 1.0 
         </a>
     </div>
     <div class="content-warp" show="{{list[currentIndex].type==='movie'}}">
@@ -418,12 +418,10 @@ export default {
     })
   },
     onShow(){
-        // $umeng_stat.resume(this) //在onShow方法的第一行加入此代码
         //App业务代码
         APP_STATISTICS.page_show( this );
     },
     onHide() {
-        // $umeng_stat.pause(this);//在onHide方法的第一行加入此代码
         //App业务代码
         APP_STATISTICS.page_hide( this );
     }      

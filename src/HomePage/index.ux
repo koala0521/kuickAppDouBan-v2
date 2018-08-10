@@ -82,42 +82,38 @@ import app from '@system.app'
 import router from '@system.router'
 import webview from '@system.webview'
 
-// console.log( ' 关于页面 (app.getInfo())>>>>' , JSON.stringify( app.getInfo() ) );
+// export default Custom_page(
+export default {
+        onInit () {
+        const theme = this.$app.$def.theme;
+        // this.$page.setTitleBar({backgroundColor: theme.color, textColor: '#ffffff'});
+        //console.log( '页面 >> this.$page 信息 >>>>' , typeof this.$page === "object" ? JSON.stringify( this.$page ) : this.$page );
+    },
+    onShow(){            
+        let page = router.getState(); //  路由信息报错
+        // console.log( '路由信息 router.getState() >>>>' , JSON.stringify(page)  );
+        // 全局数据 app 的所有地方都可以访问到。
+        let data = this.$app.$data;
+        data.currentPage = "aoubt/aaa";
 
-export default Custom_page({
-    onInit () {
-    const theme = this.$app.$def.theme;
-    // this.$page.setTitleBar({backgroundColor: theme.color, textColor: '#ffffff'});
-    //console.log( '页面 >> this.$page 信息 >>>>' , typeof this.$page === "object" ? JSON.stringify( this.$page ) : this.$page );
+    },
+    toPage(evt){
 
-  },
-  onShow(){
+        webview.loadUrl({
+            url: 'http://sandbox.sspapi.gm825.net/url/proxy?app_id=434&adslot_id=2570'
+        })
         
-    let page = router.getState(); //  路由信息报错
-    // console.log( '路由信息 router.getState() >>>>' , JSON.stringify(page)  );
+    },
+    playerMusic(){
 
-    // 全局数据 app 的所有地方都可以访问到。
-    let data = this.$app.$data;
+        // this.$element("video").start();
+    },
+    paused(){
+        // this.$element("video").pause();
+    }
 
-    data.currentPage = "aoubt/aaa";
-
-  },
-  toPage(evt){
-
-    webview.loadUrl({
-        url: 'http://sandbox.sspapi.gm825.net/url/proxy?app_id=434&adslot_id=2570'
-    })
-    
-  },
-  playerMusic(){
-
-    // this.$element("video").start();
-  },
-  paused(){
-    // this.$element("video").pause();
-  }
-
-});
+}
+// );
 
 </script>
 
