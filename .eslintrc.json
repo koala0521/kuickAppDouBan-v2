@@ -19,7 +19,11 @@
     "setTimeout": false,
     "clearTimeout": false,
     "setInterval": false,
-    "clearInterval": false
+    "clearInterval": false,
+    "Promise": true,
+    "define": true,
+    "CryptoJS": true,
+    "config": true
   },
   "plugins": [
     "hybrid"
@@ -27,7 +31,7 @@
   "rules": {
     "indent": [
       "warn",
-      4
+      "tab"
     ],
     "no-tabs":"off",
     "no-console": [
@@ -36,10 +40,13 @@
         "allow": [
           "info",
           "warn",
-          "error"
+          "error",
+          "log"
         ]
       }
     ],
+    "no-control-regex": 0,
+    "no-empty": ["error", { "allowEmptyCatch": true }],
     "no-unused-vars": [
       "warn",
       {
