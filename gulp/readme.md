@@ -13,7 +13,9 @@
     gulp --env=test
 
     <!-- 沙盒打包 -->
+    gulp --env=sand
 
+    <!-- 上线打包 -->
     gulp --env=prod
 
     <!-- 实时调试 -->
