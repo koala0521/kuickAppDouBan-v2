@@ -89,14 +89,14 @@ export default {
       
     this.$forceUpdate();
   },
-//   onShow(){
-//         //App业务代码
-//         APP_STATISTICS.page_show( this );
-//     },
-//     onHide() {
-//         //App业务代码
-//         APP_STATISTICS.page_hide( this );
-//     }   
+  onShow(){
+        //App业务代码
+        APP_STATISTICS.page_show( this );
+    },
+    onHide() {
+        //App业务代码
+        APP_STATISTICS.page_hide( this );
+    }   
 }
 </script>
 

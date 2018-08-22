@@ -89,14 +89,24 @@ export default {
         // this.$page.setTitleBar({backgroundColor: theme.color, textColor: '#ffffff'});
         //console.log( '页面 >> this.$page 信息 >>>>' , typeof this.$page === "object" ? JSON.stringify( this.$page ) : this.$page );
     },
-    onShow(){            
+    onShow(){
+        let A ={ a:1 , b:{} }
+        for (const key in A ) {
+            
+            console.log('this >>>>>>>' , JSON.stringify( A[key] ) );
+        }
+        
         let page = router.getState(); //  路由信息报错
-        // console.log( '路由信息 router.getState() >>>>' , JSON.stringify(page)  );
-        // 全局数据 app 的所有地方都可以访问到。
-        let data = this.$app.$data;
-        data.currentPage = "aoubt/aaa";
 
+        console.log(' router >>>>>>>' , JSON.stringify( page ) );
+
+        //App业务代码
+        APP_STATISTICS.page_show( this );
     },
+    onHide() {
+        //App业务代码
+        APP_STATISTICS.page_hide( this );
+    }, 
     toPage(evt){
 
         webview.loadUrl({

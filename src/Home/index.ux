@@ -8,7 +8,7 @@
         <text class="head-title">{{menuList[currentIndex].type}}</text>
         <a href="/About">
             <image onclick="toSearch" class="head-search" src="../assets/search.png"></image>
-            SDK 1.0 
+            更多>>
         </a>
     </div>
     <div class="content-warp" show="{{list[currentIndex].type==='movie'}}">
@@ -243,6 +243,7 @@
 <script>
 import router from '@system.router'
 import prompt from '@system.prompt'
+// import device from '@system.device'
 export default {
   data: {
     menuList: [
@@ -419,7 +420,7 @@ export default {
   },
     onShow(){
         //App业务代码
-        APP_STATISTICS.page_show( this );
+        APP_STATISTICS.page_show( this );      
     },
     onHide() {
         //App业务代码
