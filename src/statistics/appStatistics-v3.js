@@ -315,8 +315,8 @@ import { SSL_OP_NO_TICKET } from "constants";
 			// 初始化页面跳转监听
 			APP_STATISTICS.watchRouter((route) => {
 
-				APP_STATISTICS.routeInfo.page_name = route.name;
-				APP_STATISTICS.routeInfo.page_path = route.path;
+				APP_STATISTICS.routeInfo.page_name = route.name || '';
+				APP_STATISTICS.routeInfo.page_path = route.path || '';
 
 				// console.log( `路由变化了，路劲是：${ route.path },页面名称是：${ route.name }`);
 				let args = Object.assign({},
