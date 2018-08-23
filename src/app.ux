@@ -16,7 +16,7 @@
 
 
 // 引入统计代码 1.2.0.0
-  import '../gulp/dist/appStatistics';
+  import '../gulp/dist/appStatistics.min';
 
   export default {      
 

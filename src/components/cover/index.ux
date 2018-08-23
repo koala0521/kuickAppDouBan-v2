@@ -7,7 +7,7 @@
         <div>
           <text class="title">{{mess.title.slice(0, 7)}}</text>
         </div>
-        <rate rate="{{mess.rating.numRaters || mess.rating.stars ? mess.rating.average : ''}}"></rate>
+        <rate rate="{{ mess.rating.numRaters || mess.rating.stars ? mess.rating.average : '' }}"></rate>
       </div>
     </div> 
 </div>
