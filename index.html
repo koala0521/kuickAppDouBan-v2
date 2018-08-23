@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        #p{
+            border: 1px solid #000;
+            width: 600px;
+            min-height: 200px;
+        }
+    
+    </style>
+</head>
+<body>
+    <p> 查询字符串格式化： </p>
+    <div>
+        <textarea name="" id="text" cols="100" rows="5"></textarea>  
+    </div>
+    <div>
+        <button id="btn" >格式化</button>
+    </div>
+    <p id="p" ></p>
+    <script>
+        let text = document.getElementById('text');
+        let btn = document.getElementById('btn');
+        let p = document.getElementById('p');
+
+
+        function toObj(url){
+            var obj = {};
+            if(url.indexOf('?')!==-1){
+            var url = url.substring(url.indexOf('?')+1);
+            }else{
+            return {};
+            }
+            var arr = url.split('&');
+            arr.forEach(function(val){
+            var brr = val.split('=');
+            obj[brr[0]] = brr[1];
+            });
+            return obj;
+
+        }
+
+        btn.onclick = function(){
+            let obj = toObj( text.value.trim() );
+            let str = '';
+            for (const key in obj ) {
+                str += `${ key } : ${ obj[key] || '空' } <br/>`;
+            }
+            p.innerHTML = str;
+        }
+    
+    </script>
+</body>
+</html>

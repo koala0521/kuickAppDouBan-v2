@@ -178,7 +178,7 @@ import APP_CONFIG from './statistics.config';
 				setTimeout(() => {
 					resolve({
 						code: 204,
-						massage: '请求超时'
+						massage: 'Request timed out'
 					});
 				}, 3000);
 			});
@@ -242,10 +242,11 @@ import APP_CONFIG from './statistics.config';
 	}
 	// 获取信息接口
 	const DATAS_API = {
+		// imei 号 、mac 号
 		deviceIds() {
 			return new Promise((resolve, reject) => {
 				device.getId({
-					type: ['device', 'mac', 'user'],
+					type: ['device', 'mac'],
 					success: function (data) {
 						// console.log('获取deviceIds成功');
 						resolve(data);
@@ -257,9 +258,10 @@ import APP_CONFIG from './statistics.config';
 				})
 			})
 		},
-		advertisingId() {
+		// android id
+		getUserId() {
 			return new Promise((resolve, reject) => {
-				device.getAdvertisingId({
+				device.getUserId({
 					success: function (data) {
 						// console.log('获取deviceIds成功');
 						resolve(data);
@@ -271,7 +273,7 @@ import APP_CONFIG from './statistics.config';
 				})
 			})
 		},
-		
+		// 设备信息
 		deviceInfos() {
 			return new Promise((resolve, reject) => {
 				device.getInfo({
@@ -284,6 +286,7 @@ import APP_CONFIG from './statistics.config';
 				})
 			})
 		},
+		// 网络信息
 		netType() {
 			return new Promise((resolve, reject) => {
 				network.getType({
@@ -296,12 +299,13 @@ import APP_CONFIG from './statistics.config';
 				});
 			})
 		},
+		// 图标信息
 		has_shortcut() {
 			return new Promise((resolve, reject) => {
 				shortcut.hasInstalled({
 					success: function (bl) {
 						resolve({
-							has_icon: 1
+							has_icon: bl ? 1 : 0
 						});
 					},
 					fail: function (bl) {
@@ -317,7 +321,7 @@ import APP_CONFIG from './statistics.config';
 	// 初始化数据
 	const BASE_DATA = {
 		sdk_version: '1.2.1.1',
-		debug: 1,
+		debug: 0,
 	};
 
 	//  storage key : 用户信息数据
@@ -378,7 +382,7 @@ import APP_CONFIG from './statistics.config';
 			Promise.all([
 				DATAS_API.deviceInfos(), 
 				// DATAS_API.deviceIds(), 
-				DATAS_API.advertisingId(),
+				DATAS_API.getUserId(),
 				DATAS_API.netType(), 
 				DATAS_API.has_shortcut()
 			])
@@ -388,22 +392,23 @@ import APP_CONFIG from './statistics.config';
 					let user_all_data = Object.assign(datas, ...res);
 					// 日志相关数据
 					let public_data = {};
-					// 获取cuid
+					// 获取缓存cuid
 					getStorage(CUID_KEY)
 						.then(res => {
 
-							if (res) {								
-								
-								public_data.cuid = res.length === 32 ? res : md5( res ) ;
+							if (res) {							
+								// 有缓存，判断cuid长度，小于 32 位为 1.0.0.0版本的cuid，需要做兼容处理
+								public_data.cuid = res.length === 32 ? res : md5( res );
 
 							} else {
-								public_data.cuid = createCuid(user_all_data.client_id || '');
+								public_data.cuid = createCuid( user_all_data.userId || '' );
 							}
 							this.state.cuid = public_data.cuid;
 							public_data.req = this.state.req = createRequestId(public_data.cuid);
-
+							
 							// 保存数据
-							let user_data = this.state.data = { ...format_datas.device(user_all_data, this.state.cuid),
+							let user_data = this.state.data = { 
+								...format_datas.device(user_all_data, this.state.cuid),
 								...format_datas.public(public_data)
 							};
 
@@ -412,7 +417,7 @@ import APP_CONFIG from './statistics.config';
 									if (res) {
 										LOG_STATE.has_cuid_storage = !0;
 									}
-								});
+								})
 						})
 				})
 		}
@@ -490,6 +495,8 @@ import APP_CONFIG from './statistics.config';
 			}
 		}
 		save_to_queue(log) {
+			// console.info('发送失败' , log );
+
 			let len = this.state.log_list && this.state.log_list.length;
 			if (len && len < 50) {
 				this.state.log_list.push( log );
@@ -499,6 +506,7 @@ import APP_CONFIG from './statistics.config';
 		// 发送日志队列的所有日志 ， 不成功则保存到日志队列
 		send_queue() {
 			let queue = [...this.state.log_list];
+			// console.info('日志队列' , toString(queue) );
 			this.state.log_list = [];
 			queue.forEach(item => {
 				submitAction(item)
@@ -515,7 +523,7 @@ import APP_CONFIG from './statistics.config';
 
 	}
 
-	// format_data 格式化数据
+	// 格式化数据
 	const format_datas = {
 
 		device(args, cuid) {
@@ -532,7 +540,7 @@ import APP_CONFIG from './statistics.config';
 				// mac
 				info_ma: encrypt(args.mac || '', cuid),
 				// 用户唯一id
-				os_id: encrypt(args.user || '', cuid),
+				os_id: encrypt(args.userId || '', cuid),
 				// 品牌
 				make: (args.brand || '').toLowerCase(),
 				// 生产厂商

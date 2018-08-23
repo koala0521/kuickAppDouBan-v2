@@ -21,7 +21,24 @@
   export default {      
 
     onCreate:function() {
-    
+
+    // device.getDeviceId({
+    //   success: function(data) {
+    //     console.log(`handling success: ${data.deviceId}`)
+    //   },
+    //   fail: function(data, code) {
+    //     console.log(`handling fail, code = ${code}`)
+    //   }
+    // })
+    // device.getDeviceId({
+    //   success: function(data) {
+    //     console.log(`handling success: ${data.deviceId}`)
+    //   },
+    //   fail: function(data, code) {
+    //     console.log(`handling fail, code = ${code}`)
+    //   }
+    // })
+
       // STA.app_sta_init( this );
       APP_STATISTICS.app_sta_init( this );   
     },

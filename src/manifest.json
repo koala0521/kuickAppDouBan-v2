@@ -1,7 +1,7 @@
 {
-  "package": "com.wankaTest.test12",
-  "name": "测试demo12",
-  "versionName": "1.0.0",
+  "package": "com.wankaTest.test14",
+  "name": "测试demo14",
+  "versionName": "1.5.0",
   "versionCode": 1,
   "minPlatformVersion": 1010,
   "icon": "/Common/logo.png",

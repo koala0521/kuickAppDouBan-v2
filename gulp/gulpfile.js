@@ -117,9 +117,9 @@ gulp.task('prod',function(){
     return gulp.src( allFils )
         .pipe(concat('appStatistics.js'))
         .pipe( rename({ extname: '.min.js' }) )        
-        .pipe( sourcemaps.init() )
+        // .pipe( sourcemaps.init() )
         .pipe( uglify_es() )        
-        .pipe( sourcemaps.write("./") ) 
+        // .pipe( sourcemaps.write("./") ) 
         .pipe(gulp.dest('./dist'));
 }) 
 

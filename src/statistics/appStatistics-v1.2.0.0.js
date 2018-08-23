@@ -287,7 +287,7 @@ import APP_CONFIG from './statistics.config';
 				shortcut.hasInstalled({
 					success: function (bl) {
 						resolve({
-							has_icon: 1
+							has_icon: bl ? 1 : 0
 						});
 					},
 					fail: function (bl) {
@@ -468,6 +468,7 @@ import APP_CONFIG from './statistics.config';
 			}
 		}
 		save_to_queue(log) {
+			
 			let len = this.state.log_list && this.state.log_list.length;
 			if (len && len < 50) {
 				this.state.log_list.push( log );
