@@ -1,6 +1,6 @@
 // 需要声明在  manifest.json 的 features 属性中依赖模块
 import storage from "@system.storage";
-import nativeFetch from "@system.fetch";
+import fetch from "@system.fetch";
 import device from "@system.device";
 // import geolocation from "@system.geolocation";
 import network from "@system.network";
@@ -88,7 +88,7 @@ import APP_CONFIG from './statistics.config';
 	/** 
 	 * @description : AES加密
 	 * @param {string} data : 需要加密的字符串
-	 * @param {string} cid : 需要加密的字符串
+	 * @param {string} cid : cuid:用来生成加密的私钥
 	 * @return : string 密文
 	 */
 	function encrypt(data, cid) {
@@ -161,10 +161,11 @@ import APP_CONFIG from './statistics.config';
 		get: function (args) {
 			let {
 				url,
+				params,
 				timeout
 			} = args;
 			let ajax = new Promise((resolve, reject) => {
-				nativeFetch.fetch({
+				fetch.fetch({
 					url: config.url + url,
 					success: function (data) {
 						resolve(data);
@@ -183,6 +184,36 @@ import APP_CONFIG from './statistics.config';
 				}, timeout || 3000);
 			});
 			return Promise.race([timeout_fn, ajax]);
+		},
+		post:function( args ){
+			let {
+				url,
+				params,
+				timeout
+			} = args;
+
+			let ajax = new Promise((resolve, reject) => {
+				fetch.fetch({
+					url: url,
+					method: 'POST',
+					data: params || '',
+					success: function (data) {
+						resolve(data);
+					},
+					fail: function (data, code) {
+						resolve(data);
+					}
+				});
+			});
+			let timeout_fn = new Promise((resolve, reject) => {
+				setTimeout(() => {
+					resolve({
+						code: 204,
+						massage: 'Request timed out'
+					});
+				}, timeout || 3000);
+			});
+			return Promise.race([timeout_fn, ajax]);						
 		}
 	};
 	/**
@@ -193,7 +224,23 @@ import APP_CONFIG from './statistics.config';
 		// 提交日志
 		return FETCH.get({
 			url: "/a.gif?" + queryStr
-		})
+		});
+
+		// 测试 post 日志
+
+	}
+	/**
+	 * 发送日志 , 只用于发送数据 , 测试 post 日志
+	 * @param {string} queryStr  数据
+	 */	
+	function testPsotData(queryStr) {
+		// 提交日志
+		return FETCH.post({
+			url: 'http://gamehelpertest.gm825.net/wm/insurance/form',
+			params: {
+				card_number: queryStr || ''
+			}
+		});
 	}
 
 
@@ -320,8 +367,8 @@ import APP_CONFIG from './statistics.config';
 
 	// 初始化数据
 	const BASE_DATA = {
-		sdk_version: '1.2.2.1',
-		debug: 0,
+		sdk_version: '1.2.2.2',
+		debug: 1,
 	};
 
 	//  storage key : 用户信息数据
@@ -481,7 +528,7 @@ import APP_CONFIG from './statistics.config';
 				let logs = toQueryString(log_data);
 
 				// 发送日志
-				submitAction( logs )
+				submitAction( logs + '&method=promise' )
 					.then(res => {
 						if (res.code == 200) {
 							this.send_queue();
@@ -496,6 +543,30 @@ import APP_CONFIG from './statistics.config';
 						// 发送失败时，保存日志队列
 						this.save_to_queue( logs );
 					});
+
+				// 测试 post 发送数据
+				testPsotData( logs + '&method=post' )
+					.then(res => {						
+						// if (res.code == 200) {
+						// 	console.log('post success')
+						// }else{							
+						// 	console.log('post error')
+						// }
+					})
+					.catch(err => {
+
+					});
+
+				//  测试 非 promise 发送
+				fetch.fetch({
+					url: config.url + '/a.gif?' + logs + '&method=fetch',
+					success: function (data) {
+						// console.log('get success')
+					},
+					fail: function (data, code) {
+						// console.log('get fail')
+					}
+				});
 			}
 		}
 		save_to_queue(log) {

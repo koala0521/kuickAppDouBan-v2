@@ -2,8 +2,8 @@
   "package": "com.wankaTest.test15",
   "name": "测试demo15",
   "versionName": "1.5.0",
-  "versionCode": 1,
-  "minPlatformVersion": 1010,
+  "versionCode": "1",
+  "minPlatformVersion": "1000",
   "icon": "/Common/logo.png",
   "features": [
     { "name": "system.prompt" },

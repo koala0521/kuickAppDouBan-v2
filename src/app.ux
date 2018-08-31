@@ -12,8 +12,6 @@
   import account from '@service.account';
   import app from '@system.app';
   import shortcut from '@system.shortcut';
-  import device from '@system.device'
-
 
 // 引入统计代码 1.2.0.0
   import '../gulp/dist/appStatistics.min';
@@ -21,29 +19,9 @@
   export default {      
 
     onCreate:function() {
-
-    // device.getDeviceId({
-    //   success: function(data) {
-    //     console.log(`handling success: ${data.deviceId}`)
-    //   },
-    //   fail: function(data, code) {
-    //     console.log(`handling fail, code = ${code}`)
-    //   }
-    // })
-    // device.getDeviceId({
-    //   success: function(data) {
-    //     console.log(`handling success: ${data.deviceId}`)
-    //   },
-    //   fail: function(data, code) {
-    //     console.log(`handling fail, code = ${code}`)
-    //   }
-    // })
-
-      // STA.app_sta_init( this );
       APP_STATISTICS.app_sta_init( this );   
     },
     onDestroy () {
-      // APP_STATISTICS.app_destroy();
       console.info('*****Application onDestroy1*****')         
     },
      
